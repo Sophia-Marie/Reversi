@@ -7,6 +7,7 @@ window = pygame.display.set_mode((800,700))
 pygame.display.set_caption("Reversi")
 
 GREEN = (51,102,0)
+BROWN = (80,26,26)
 gameLoop=True
 while gameLoop:
 
@@ -14,7 +15,7 @@ while gameLoop:
         if event.type == pygame.QUIT:
             gameLoop=False
 
-    window.fill((80,26,26))
+    window.fill(BROWN)
 
     positionList = [100, 100, 70, 70]
     for position in range(1,65):
