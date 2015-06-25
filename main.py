@@ -6,8 +6,12 @@ window = pygame.display.set_mode((800,700))
 
 pygame.display.set_caption("Reversi")
 
+#Farben
 GREEN = (51,102,0)
 BROWN = (80,26,26)
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+
 gameLoop=True
 while gameLoop:
 
