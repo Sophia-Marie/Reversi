@@ -13,7 +13,7 @@ def draw_Field(colour):
 
 
 def statusColour():
-    statusRect= pygame.mouse.get_pressed()
+    statusRect= pygame.mouse.get_pressed()[0]
     statusColour=(0,0,0)
     
     if statusRect==True:
@@ -24,6 +24,16 @@ def statusColour():
 
     return statusColour
 
+def draw_buttons():
+    mousePosition= pygame.mouse.get_pos()
+    clicked= pygame.mouse.get_pressed()[0]
+    
+    if 100 > mousePosition[0] > 50 and 70 > mousePosition[1] > 50 and clicked==1:
+        pygame.draw.rect(window, GREY, (50,50,50,20))
+        
+    else:
+        pygame.draw.rect(window, WHITE, (50, 50, 50, 20))
+
 pygame.init()
 
 window = pygame.display.set_mode((800,700))
@@ -31,11 +41,12 @@ window = pygame.display.set_mode((800,700))
 pygame.display.set_caption("Reversi")
 
 #Colours
-PINK  =  (102, 0, 51)
+PINK  = (102, 0, 51)
 GREEN = (51,102,0)
 BROWN = (80,26,26)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
+GREY  = (160,160,160)
 
 gameLoop=True
 while gameLoop:
@@ -48,6 +59,7 @@ while gameLoop:
 
     colour= statusColour()
     draw_Field(colour)
+    draw_buttons()
 
     pygame.display.flip()
 pygame.quit()
