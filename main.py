@@ -3,6 +3,7 @@ import pygame
 def check_mouse_position(allPositionsRect):
     mousex,mousey = pygame.mouse.get_pos()
     for i, positionList in enumerate(allPositionsRect):
+        if positionList[0] < mousex < positionList[0]+positionList[2] and positionList[1] < mousey < positionList[1]+positionList[3]:
             return i
         
         
