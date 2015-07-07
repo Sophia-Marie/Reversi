@@ -1,16 +1,24 @@
 import pygame
 
-def check_mouse_position(allPositionsRect):
-    mousex,mousey = pygame.mouse.get_pos()
+def check_mouse_position(allPositionsRect, mouseX, mouseY):
+##    mousex,mousey = pygame.mouse.get_pos()
     for i, positionList in enumerate(allPositionsRect):
-        if positionList[0] < mousex < positionList[0]+positionList[2] and positionList[1] < mousey < positionList[1]+positionList[3]:
+        if positionList[0] < mouseX < positionList[0]+positionList[2] and positionList[1] < mouseY < positionList[1]+positionList[3]:
             return i
         
+def get_mouse_position():
+    mouseX,mouseY = pygame.mouse.get_pos()
+    return mouseX, mouseY
+
         
+def check_mouse_pressed():
+    clicked= pygame.mouse.get_pressed()[0] 
+    return clicked
 
 def calculate_position():
     positionList = [100, 100, 70, 70]
     allPositions=[list(positionList)]
+    
     for position in range(1,65):
         if position !=0 and position %8==0:
             positionList[1] +=72
@@ -25,11 +33,10 @@ def draw_Field(window, allPositionsRect):
     for positionList in allPositionsRect:
         pygame.draw.rect(window, GREEN, positionList)
     
-def draw_buttons():
+def draw_buttons(mouseX, mouseY, clicked):
     mousePosition= pygame.mouse.get_pos()
-    clicked= pygame.mouse.get_pressed()[0]
-    
-    if 100 > mousePosition[0] > 50 and 70 > mousePosition[1] > 50 and clicked==1:
+    # New Game Button
+    if 100 > mouseX > 50 and 70 > mouseY > 50 and clicked==1:
         pygame.draw.rect(window, GREY, (50,50,50,20))
         
     else:
@@ -57,10 +64,12 @@ while gameLoop:
             gameLoop=False
 
     window.fill(BROWN)
-    draw_buttons()
+    mouseX, mouseY = get_mouse_position()
+    clicked = check_mouse_pressed()
+    draw_buttons(momuseX, mouseY, clicked)
     allPositionsRect = calculate_position()
-    clicked=check_mouse_position(allPositionsRect)
-    print clicked
+    positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
+    print positionArrow
     draw_Field(window, allPositionsRect)
 
     pygame.display.flip()
