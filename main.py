@@ -19,7 +19,7 @@ def calculate_position():
     positionList = [100, 100, 70, 70]
     allPositions=[list(positionList)]
     
-    for position in range(1,65):
+    for position in range(1,64):
         if position !=0 and position %8==0:
             positionList[1] +=72
             positionList[0] = 100
@@ -66,7 +66,7 @@ while gameLoop:
     window.fill(BROWN)
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
-    draw_buttons(momuseX, mouseY, clicked)
+    draw_buttons(mouseX, mouseY, clicked)
     allPositionsRect = calculate_position()
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
     print positionArrow
