@@ -25,6 +25,24 @@ def check_mouse_pressed():
     clicked= pygame.mouse.get_pressed()[0] 
     return clicked
 
+def white_circle_list():
+    posListCircle= [150,150]
+    allPosCircle=[list(posListCircle)]
+
+    for position in range(1,64):
+        if position !=0 and position %8==0:
+            posListCircle[1] +=72
+            posListCircle[0] = 150
+        else:
+            posListCircle[0] +=72
+        allPosCircle.append(list(posListCircle))
+        
+    whiteStonesList=[]
+    for posListCircle in allPosCircle:
+        whiteStone= pygame.draw.circle(window, WHITE, allPosCircle, 25)
+        whiteStonesList.append(list(whitStone))
+        
+        
 def calculate_position():
     positionList = [100, 100, 70, 70]
     allPositions=[list(positionList)]
@@ -40,7 +58,7 @@ def calculate_position():
     return allPositions
 
 
-def draw_Field(window, allPositionsRect, positionArrow, clicked):
+def draw_Field(window, allPositionsRect, positionArrow):
     for i, positionList in enumerate(allPositionsRect):
         
         if positionArrow==i:
@@ -65,9 +83,12 @@ def draw_buttons(mouseX, mouseY, clicked):
     else:
         pygame.draw.rect(window, WHITE, (50, 50, 50, 20))
 
+
+
 pygame.init()
 
 window = pygame.display.set_mode((800,700))
+
 
 pygame.display.set_caption("Reversi")
 
@@ -94,6 +115,7 @@ while gameLoop:
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
     print positionArrow
     draw_Field(window, allPositionsRect, positionArrow)
+    #white_circle_list()
 
     pygame.display.flip()
 pygame.quit()
