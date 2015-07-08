@@ -1,7 +1,17 @@
 import pygame
 
+##
+##class rectangle():
+##    
+##    def__init__(self, ):
+
+
+
+
+
+
+
 def check_mouse_position(allPositionsRect, mouseX, mouseY):
-##    mousex,mousey = pygame.mouse.get_pos()
     for i, positionList in enumerate(allPositionsRect):
         if positionList[0] < mouseX < positionList[0]+positionList[2] and positionList[1] < mouseY < positionList[1]+positionList[3]:
             return i
@@ -26,12 +36,25 @@ def calculate_position():
         else:
             positionList[0] +=72
         allPositions.append(list(positionList))
+        
     return allPositions
 
 
-def draw_Field(window, allPositionsRect):
-    for positionList in allPositionsRect:
-        pygame.draw.rect(window, GREEN, positionList)
+def draw_Field(window, allPositionsRect, positionArrow, clicked):
+    for i, positionList in enumerate(allPositionsRect):
+        
+        if positionArrow==i:
+            pygame.draw.rect(window, PINK, positionList)
+        else:
+            pygame.draw.rect(window, GREEN, positionList)
+        
+    #circle(Surface, color, pos, radius, width=0)
+    #Grundaufstellung
+    pygame.draw.circle(window, BLACK, (350, 350), 25)
+    pygame.draw.circle(window, WHITE, (350+72, 350), 25)
+    pygame.draw.circle(window, BLACK, (350+72, 350+72), 25)
+    pygame.draw.circle(window, WHITE, (350, 350+72), 25)
+
     
 def draw_buttons(mouseX, mouseY, clicked):
     mousePosition= pygame.mouse.get_pos()
@@ -70,7 +93,7 @@ while gameLoop:
     allPositionsRect = calculate_position()
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
     print positionArrow
-    draw_Field(window, allPositionsRect)
+    draw_Field(window, allPositionsRect, positionArrow)
 
     pygame.display.flip()
 pygame.quit()
