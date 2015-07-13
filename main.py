@@ -46,17 +46,10 @@ def calculate_position():
 
 
 def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
-    for i, positionList, stone in enumerate(allPositionsRect), stoneSet:
+    for i, positionList in enumerate(allPositionsRect):
         
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
-            
-            if stone==1:
-                pygame.draw.cirle(window, BLACK, (positionList[0]+50, positionList[1]+50), 25)
-            elif stone==2:
-                pygame.draw.cirlce(window, WHITE,(positionList[0]+50, positionList[1]+50), 25)
-            else:
-                pass
             
         elif positionArrow==i and clicked==1:
             pygame.draw.rect(window, PINK, positionList)
@@ -68,12 +61,13 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
             
         else:
             pygame.draw.rect(window, GREEN, positionList)
-            if stone==1:
-                pygame.draw.cirle(window, BLACK, (positionList[0]+50, positionList[1]+50), 25)
-            elif stone==2:
-                pygame.draw.cirlce(window, WHITE,(positionList[0]+50, positionList[1]+50), 25)
-            else:
-                pass
+    
+        if stoneSet[i]==1:
+            pygame.draw.cirle(window, BLACK, (positionList[0]+50, positionList[1]+50), 25)
+        elif stoneSet[i]==2:
+            pygame.draw.cirlce(window, WHITE,(positionList[0]+50, positionList[1]+50), 25)
+        else:
+            pass
 
             
     #circle(Surface, color, pos, radius, width=0)
