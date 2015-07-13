@@ -45,7 +45,7 @@ def calculate_position():
     return allPositions
 
 
-def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
+def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playercolour):
     for i, positionList in enumerate(allPositionsRect):
         
         if positionArrow==i:
@@ -53,7 +53,7 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
             
         elif positionArrow==i and clicked==1:
             pygame.draw.rect(window, PINK, positionList)
-            pygame.draw.circle(window, playercolour, (positionList[0]+50, positionList[1]+50), 25)
+            pygame.draw.circle(window, playercolour, (positionList[0]+35, positionList[1]+35), 25)
             if playercolour==BLACK:
                 stoneSet[i]= 1
             else :
@@ -63,9 +63,9 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
             pygame.draw.rect(window, GREEN, positionList)
     
         if stoneSet[i]==1:
-            pygame.draw.cirle(window, BLACK, (positionList[0]+50, positionList[1]+50), 25)
+            pygame.draw.circle(window, BLACK, (positionList[0]+35, positionList[1]+35), 25)
         elif stoneSet[i]==2:
-            pygame.draw.cirlce(window, WHITE,(positionList[0]+50, positionList[1]+50), 25)
+            pygame.draw.circle(window, WHITE,(positionList[0]+35, positionList[1]+35), 25)
         else:
             pass
 
@@ -110,6 +110,8 @@ PLAYER = 1
 # first call of functions
 
 stoneSet= stones_set()
+stoneSet[7]=1
+
 gameLoop=True
 while gameLoop:
 
@@ -128,8 +130,8 @@ while gameLoop:
     draw_buttons(mouseX, mouseY, clicked)
     allPositionsRect = calculate_position()
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
-    print positionArrow
-    draw_Field(window, allPositionsRect, positionArrow, stoneSet, playercolour)
+    draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked, playercolour)
+    print playercolour
     
     if clicked==1 and PLAYER==1:
         PLAYER=2
