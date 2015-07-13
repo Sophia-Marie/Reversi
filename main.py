@@ -12,7 +12,7 @@ import pygame
 
 
 def check_mouse_position(allPositionsRect, mouseX, mouseY):
-    for i, positionList in enumerate(allPositionsRect):
+    for i, positionList, in enumerate(allPositionsRect):
         if positionList[0] < mouseX < positionList[0]+positionList[2] and positionList[1] < mouseY < positionList[1]+positionList[3]:
             return i
         
@@ -45,21 +45,35 @@ def calculate_position():
     return allPositions
 
 
-def draw_Field(window, allPositionsRect, positionArrow, stonesSet):
-    for i, positionList in enumerate(allPositionsRect):
+def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
+    for i, positionList, stone in enumerate(allPositionsRect), stoneSet:
         
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
+            
+            if stone==1:
+                pygame.draw.cirle(window, BLACK, (positionList[0]+50, positionList[1]+50), 25)
+            elif stone==2:
+                pygame.draw.cirlce(window, WHITE,(positionList[0]+50, positionList[1]+50), 25)
+            else:
+                pass
+            
+        elif positionArrow==i and clicked==1:
+            pygame.draw.rect(window, PINK, positionList)
+            pygame.draw.circle(window, playercolour, (positionList[0]+50, positionList[1]+50), 25)
+            if playercolour==BLACK:
+                stoneSet[i]= 1
+            else :
+                stoneSet[i]=2
+            
         else:
             pygame.draw.rect(window, GREEN, positionList)
-
-    for i in stonesSet:
-        if i==1:
-            pygame.draw.cirle(window, BLACK, (0,0), 25)
-        elif i==2:
-            pygame.draw.cirlce(window, WHITE, (0,0), 25)
-        else:
-            pass
+            if stone==1:
+                pygame.draw.cirle(window, BLACK, (positionList[0]+50, positionList[1]+50), 25)
+            elif stone==2:
+                pygame.draw.cirlce(window, WHITE,(positionList[0]+50, positionList[1]+50), 25)
+            else:
+                pass
 
             
     #circle(Surface, color, pos, radius, width=0)
@@ -99,17 +113,21 @@ WHITE = (255,255,255)
 GREY  = (160,160,160)
 
 PLAYER = 1
-
 # first call of functions
 
-stonesSet= stones_set()
+stoneSet= stones_set()
 gameLoop=True
 while gameLoop:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameLoop=False
-    
+
+    if PLAYER==1:
+        playercolour= BLACK
+    else:
+        playercolour= WHITE
+
     window.fill(BROWN)
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
@@ -117,8 +135,12 @@ while gameLoop:
     allPositionsRect = calculate_position()
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
     print positionArrow
-    draw_Field(window, allPositionsRect, positionArrow, stonesSet)
-
+    draw_Field(window, allPositionsRect, positionArrow, stoneSet, playercolour)
+    
+    if clicked==1 and PLAYER==1:
+        PLAYER=2
+    elif clicked==1 and PLAYER==2:
+        PLAYER=1
 
 
     pygame.display.flip()
