@@ -51,13 +51,12 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playe
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
             
-        elif positionArrow==i and clicked==1:
-            pygame.draw.rect(window, PINK, positionList)
-            pygame.draw.circle(window, playercolour, (positionList[0]+35, positionList[1]+35), 25)
-            if playercolour==BLACK:
-                stoneSet[i]= 1
-            else :
-                stoneSet[i]=2
+            if positionArrow==i and clicked==1:
+                pygame.draw.circle(window, playercolour, (positionList[0]+35, positionList[1]+35), 25)
+                if playercolour==BLACK:
+                    stoneSet[i]= 1
+                else :
+                    stoneSet[i]=2
             
         else:
             pygame.draw.rect(window, GREEN, positionList)
@@ -110,7 +109,6 @@ PLAYER = 1
 # first call of functions
 
 stoneSet= stones_set()
-stoneSet[7]=1
 
 gameLoop=True
 while gameLoop:
@@ -131,7 +129,7 @@ while gameLoop:
     allPositionsRect = calculate_position()
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
     draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked, playercolour)
-    print playercolour
+    print clicked
     
     if clicked==1 and PLAYER==1:
         PLAYER=2
