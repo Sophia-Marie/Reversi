@@ -34,6 +34,18 @@ def calculate_position():
         
     return allPositions
 
+def when_stone_set_or_not():
+    #es muss ein andersfarbiger stein neben dem gesetzten sein
+    #diagonal oder in der reihe (hotizontal und vertikal) muss ein gleichfarbiger stein sein
+    if PLAYER==1:s
+        #in stoneset gleiche reihe diagonal, horizontal oder vertikal muss ein stein gleicher farbe sein und neben dem wo er klickt ein andersfarbiger
+        return True
+
+    else:
+        #in stoneset gleiche reihe diagonal, horizontal oder vertikal muss ein stein gleicher farbe sein und neben dem wo er klickt ein andersfarbiger
+        return True
+
+    
 
 def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playercolour):
     for i, positionList in enumerate(allPositionsRect):
@@ -60,13 +72,6 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playe
 
             
     #circle(Surface, color, pos, radius, width=0)
-##    #Grundaufstellung
-##    pygame.draw.circle(window, BLACK, (350, 350), 25)
-##    pygame.draw.circle(window, WHITE, (350+72, 350), 25)
-##    pygame.draw.circle(window, BLACK, (350+72, 350+72), 25)
-##    pygame.draw.circle(window, WHITE, (350, 350+72), 25)
-
-    
 
     
 def draw_buttons(mouseX, mouseY, clicked):
