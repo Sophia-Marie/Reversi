@@ -1,15 +1,5 @@
 import pygame
 
-##
-##class rectangle():
-##    
-##    def__init__(self, ):
-
-
-
-
-
-
 
 def check_mouse_position(allPositionsRect, mouseX, mouseY):
     for i, positionList, in enumerate(allPositionsRect):
@@ -51,7 +41,7 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playe
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
             
-            if positionArrow==i and clicked==1:
+            if clicked==1:
                 pygame.draw.circle(window, playercolour, (positionList[0]+35, positionList[1]+35), 25)
                 if playercolour==BLACK:
                     stoneSet[i]= 1
@@ -70,11 +60,11 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playe
 
             
     #circle(Surface, color, pos, radius, width=0)
-    #Grundaufstellung
-    pygame.draw.circle(window, BLACK, (350, 350), 25)
-    pygame.draw.circle(window, WHITE, (350+72, 350), 25)
-    pygame.draw.circle(window, BLACK, (350+72, 350+72), 25)
-    pygame.draw.circle(window, WHITE, (350, 350+72), 25)
+##    #Grundaufstellung
+##    pygame.draw.circle(window, BLACK, (350, 350), 25)
+##    pygame.draw.circle(window, WHITE, (350+72, 350), 25)
+##    pygame.draw.circle(window, BLACK, (350+72, 350+72), 25)
+##    pygame.draw.circle(window, WHITE, (350, 350+72), 25)
 
     
 
@@ -107,8 +97,15 @@ GREY  = (160,160,160)
 
 PLAYER = 1
 # first call of functions
-
+allPositionsRect = calculate_position()
 stoneSet= stones_set()
+
+#Grundaufstellung
+stoneSet[27] = 1
+stoneSet[28] = 2
+stoneSet[35] = 2
+stoneSet[36] = 1
+
 
 gameLoop=True
 while gameLoop:
@@ -126,7 +123,6 @@ while gameLoop:
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
     draw_buttons(mouseX, mouseY, clicked)
-    allPositionsRect = calculate_position()
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
     draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked, playercolour)
     print clicked
@@ -136,6 +132,7 @@ while gameLoop:
     elif clicked==1 and PLAYER==2:
         PLAYER=1
 
+    #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
 
     pygame.display.flip()
 pygame.quit()
