@@ -34,42 +34,28 @@ def calculate_position():
         
     return allPositions
 
-##def when_stone_set_or_not():
-##    #es muss ein andersfarbiger stein neben dem gesetzten sein
-##    #diagonal oder in der reihe (hotizontal und vertikal) muss ein gleichfarbiger stein sein
-##    if PLAYER==1:s
-##        #in stoneset gleiche reihe diagonal, horizontal oder vertikal muss ein stein gleicher farbe sein und neben dem wo er klickt ein andersfarbiger
-##        return True
-##
-##    else:
-##        #in stoneset gleiche reihe diagonal, horizontal oder vertikal muss ein stein gleicher farbe sein und neben dem wo er klickt ein andersfarbiger
-##        return True
 
-def change_player(PLAYER):
-       
-    if PLAYER==1:
-        PLAYER=2
-        
-    elif PLAYER==2:
-        PLAYER=1
-    else:
-        pass
-
-def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playercolour, PLAYER):
+def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
+    
+    global PLAYER
+    
     for i, positionList in enumerate(allPositionsRect):
         
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
             
-            if clicked==1:
-                pygame.draw.circle(window, playercolour, (positionList[0]+35, positionList[1]+35), 25)
+            if clicked==1 and stoneSet[i]==0:
                 
-                if playercolour==BLACK:
-                    stoneSet[i]= 1
-                    change_player(PLAYER)
+                pygame.draw.circle(window, PLAYER, (positionList[0]+35, positionList[1]+35), 25)
+                
+                if PLAYER==BLACK:
+                    stoneSet[i]=1
+                    PLAYER= WHITE    
                 else :
                     stoneSet[i]=2
-                    change_player(PLAYER)
+                    PLAYER=BLACK
+                    
+           
             
         else:
             pygame.draw.rect(window, GREEN, positionList)
@@ -81,10 +67,8 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, playe
         else:
             pass
         
-         
+       
     #circle(Surface, color, pos, radius, width=0)
-
-    
 def draw_buttons(mouseX, mouseY, clicked):
     mousePosition= pygame.mouse.get_pos()
     # New Game Button
@@ -103,7 +87,7 @@ window = pygame.display.set_mode((800,700))
 
 pygame.display.set_caption("Reversi")
 
-#global variable
+#global variables
 #Colours
 
 PINK  = (102, 0, 51)
@@ -113,7 +97,8 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GREY  = (160,160,160)
 
-PLAYER = 1
+PLAYER = BLACK
+
 # first call of functions
 allPositionsRect = calculate_position()
 stoneSet= stones_set()
@@ -132,21 +117,15 @@ while gameLoop:
         if event.type == pygame.QUIT:
             gameLoop=False
 
-    if PLAYER==1:
-        playercolour= BLACK
-    else:
-        playercolour= WHITE 
-
     window.fill(BROWN)
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
     draw_buttons(mouseX, mouseY, clicked)
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
-    draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked, playercolour, PLAYER)
-    print PLAYER
+    draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked)
 
     #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
-
+    
     pygame.display.flip()
     
 pygame.quit()
