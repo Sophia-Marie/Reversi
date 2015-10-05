@@ -1,10 +1,14 @@
 import pygame
 
 
+# to do: Regeln und 2 Spieler sollen spielen können.
+
 def check_mouse_position(allPositionsRect, mouseX, mouseY):
     for i, positionList, in enumerate(allPositionsRect):
         if positionList[0] < mouseX < positionList[0]+positionList[2] and positionList[1] < mouseY < positionList[1]+positionList[3]:
             return i
+
+#Klasse: Maus Eigenschaften: Position, gedrueckt...
         
 def get_mouse_position():
     mouseX,mouseY = pygame.mouse.get_pos()
@@ -35,7 +39,7 @@ def calculate_position():
     return allPositions
 
 
-def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
+def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, availableMove):
     
     global PLAYER
     
@@ -43,20 +47,19 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
         
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
-            
-            if clicked==1 and stoneSet[i]==0:
+            if clicked==1 and stoneSet[i]==0 and availableMove==True:
+
                 
-                pygame.draw.circle(window, PLAYER, (positionList[0]+35, positionList[1]+35), 25)
+              #  pygame.draw.circle(window, PLAYER, (positionList[0]+35, positionList[1]+35), 25)
                 
                 if PLAYER==BLACK:
                     stoneSet[i]=1
-                    PLAYER= WHITE    
+                    PLAYER= WHITE
+                    
                 else :
                     stoneSet[i]=2
                     PLAYER=BLACK
                     
-           
-            
         else:
             pygame.draw.rect(window, GREEN, positionList)
     
@@ -66,6 +69,92 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked):
             pygame.draw.circle(window, WHITE,(positionList[0]+35, positionList[1]+35), 25)
         else:
             pass
+#Klasse draw_field:
+
+def available_Moves_horizontal_right(p):
+    p=p+1
+    modulo_offset=1
+    rightBoarder= (p+modulo_offset)%8
+    if PLAYER==BLACK:
+        if stoneSet[p]==2:
+            availableMove=True
+        else:
+            availableMove=False
+    else:
+        if stoneSet[p]==1:
+            availableMove=True
+        else:
+            availableMove=False
+            
+    if rightBoarder!=0:
+        available_Moves_horizontal_right(p)
+    else:
+        None
+    return availableMove
+
+##def available_moves_horizontal_left():
+##    p=p-1
+##    leftBoarder= p%8
+##    if PLAYER==BLACK:
+##        if stoneSet[p]==2:
+##            availableMove=True
+##        else:
+##            availableMove=False
+##    else:
+##        if stoneSet[p]==1:
+##            availableMove=True
+##        else:
+##            availableMove=False 
+##
+##    if leftBoarder!=0:
+##        available_moves_horizontal_left(p)
+##    else:
+##        None
+##
+##    return availableMove
+##
+##def available_moves_vertikal_up():
+##    
+##    p=p+8
+##    if PLAYER==BLACK:
+##        if stoneSet[p]==2:
+##            availableMove=True
+##        else:
+##            availableMove=False
+##    else:
+##        if stoneSet[p]==1:
+##            availableMove=True
+##        else:
+##            availableMove=False
+##    #if boarder at top reached
+##    if p>=1:
+##        available_moves_vertikal_up(p):
+##    else:
+##        None
+##
+##    return availableMove
+##
+##def available_moves_vertikal_down():
+##    
+##    p=p+8
+##    if PLAYER==BLACK:
+##        if stoneSet[p]==2:
+##            availableMove=True
+##        else:
+##            availableMove=False
+##    else:
+##        if stoneSet[p]==1:
+##            availableMove=True
+##        else:
+##            availableMove=False
+##    #if boarder at top reached
+##    if p<=62:
+##        available_moves_vertikal_down(p):
+##    else:
+##        None
+##
+##    return availableMove
+    
         
        
     #circle(Surface, color, pos, radius, width=0)
@@ -103,6 +192,9 @@ PLAYER = BLACK
 allPositionsRect = calculate_position()
 stoneSet= stones_set()
 
+#Klasse:
+window.fill(BROWN)
+
 #Grundaufstellung
 stoneSet[27] = 1
 stoneSet[28] = 2
@@ -116,14 +208,16 @@ while gameLoop:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameLoop=False
-
-    window.fill(BROWN)
+            
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
     draw_buttons(mouseX, mouseY, clicked)
     positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
-    draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked)
-
+    p=0
+    if clicked==1:
+        p=positionArrow
+    availableMove=available_Moves_horizontal_right(p)
+    draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked, availableMove)
     #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
     
     pygame.display.flip()
