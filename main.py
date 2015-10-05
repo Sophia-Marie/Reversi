@@ -48,7 +48,6 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, avail
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
             if clicked==1 and stoneSet[i]==0 and availableMove==True:
-
                 
               #  pygame.draw.circle(window, PLAYER, (positionList[0]+35, positionList[1]+35), 25)
                 
@@ -71,92 +70,45 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, avail
             pass
 #Klasse draw_field:
 
-def available_Moves_horizontal_right(p):
-    p=p+1
-    modulo_offset=1
-    rightBoarder= (p+modulo_offset)%8
-    if PLAYER==BLACK:
-        if stoneSet[p]==2:
-            availableMove=True
-        else:
-            availableMove=False
-    else:
-        if stoneSet[p]==1:
-            availableMove=True
-        else:
-            availableMove=False
-            
-    if rightBoarder!=0:
-        available_Moves_horizontal_right(p)
-    else:
-        None
-    return availableMove
+def available_Moves_horizontal(p, direction, foundOpponent = False):
+    p += direction
 
-##def available_moves_horizontal_left():
-##    p=p-1
-##    leftBoarder= p%8
-##    if PLAYER==BLACK:
-##        if stoneSet[p]==2:
-##            availableMove=True
-##        else:
-##            availableMove=False
-##    else:
-##        if stoneSet[p]==1:
-##            availableMove=True
-##        else:
-##            availableMove=False 
-##
-##    if leftBoarder!=0:
-##        available_moves_horizontal_left(p)
-##    else:
-##        None
-##
-##    return availableMove
-##
-##def available_moves_vertikal_up():
-##    
-##    p=p+8
-##    if PLAYER==BLACK:
-##        if stoneSet[p]==2:
-##            availableMove=True
-##        else:
-##            availableMove=False
-##    else:
-##        if stoneSet[p]==1:
-##            availableMove=True
-##        else:
-##            availableMove=False
-##    #if boarder at top reached
-##    if p>=1:
-##        available_moves_vertikal_up(p):
-##    else:
-##        None
-##
-##    return availableMove
-##
-##def available_moves_vertikal_down():
-##    
-##    p=p+8
-##    if PLAYER==BLACK:
-##        if stoneSet[p]==2:
-##            availableMove=True
-##        else:
-##            availableMove=False
-##    else:
-##        if stoneSet[p]==1:
-##            availableMove=True
-##        else:
-##            availableMove=False
-##    #if boarder at top reached
-##    if p<=62:
-##        available_moves_vertikal_down(p):
-##    else:
-##        None
-##
-##    return availableMove
-    
-        
-       
+    print "stoneSet[p]:", stoneSet[p]
+
+    if not foundOpponent:
+        if PLAYER==BLACK:
+            foundOpponent = stoneSet[p] == 2
+        else:
+            foundOpponent = stoneSet[p] == 1
+            
+    MODULO_OFFSET=1 # Because modulo works best with even numbers
+    LEFT_BORDER_OFFSET=7 # Modulo checks right border, this offset simulates a right border when it is actually the left border
+
+    if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0:
+        print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+        return False
+    elif stoneSet[p] == 0:
+        print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+        return False        
+    elif stoneSet[p] == (2 if PLAYER == WHITE else 1):
+        print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+        return foundOpponent
+    else:
+        print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+        return available_Moves_horizontal(p, direction, foundOpponent)
+
+def available_Moves_horizontal_flip(p, direction, foundOpponent = False):
+    p += direction
+    if stoneSet[p] == (2 if PLAYER == WHITE else 1):
+        print "[FLIP] end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+        return
+    else:
+        print "[FLIP] coloring and recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+        stoneSet[p] = 2 if PLAYER == WHITE else 1
+        return available_Moves_horizontal_flip(p, direction, foundOpponent)    
+
+
+           
     #circle(Surface, color, pos, radius, width=0)
 def draw_buttons(mouseX, mouseY, clicked):
     mousePosition= pygame.mouse.get_pos()
@@ -201,6 +153,25 @@ stoneSet[28] = 2
 stoneSet[35] = 2
 stoneSet[36] = 1
 
+# Test
+stoneSet[9] = 1
+stoneSet[10] = 2
+stoneSet[12] = 2
+stoneSet[13] = 1
+
+
+def analyseAndFlip(direction):
+    print "--- analysis start --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")
+    flipOk = available_Moves_horizontal(positionArrow, direction)
+
+    if flipOk:
+        print "--- flip start --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")
+        available_Moves_horizontal_flip(positionArrow, direction)
+        print "--- flip end --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")        
+
+    print "--- analysis end --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")
+    print
+    return flipOk
 
 gameLoop=True
 while gameLoop:
@@ -212,12 +183,18 @@ while gameLoop:
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
     draw_buttons(mouseX, mouseY, clicked)
-    positionArrow=check_mouse_position(allPositionsRect, mouseX, mouseY)
-    p=0
-    if clicked==1:
-        p=positionArrow
-    availableMove=available_Moves_horizontal_right(p)
-    draw_Field(window, allPositionsRect, positionArrow, stoneSet,clicked, availableMove)
+    positionArrow = check_mouse_position(allPositionsRect, mouseX, mouseY)
+
+    #flipOk = analyseAndFlip(1) if positionArrow and clicked else False
+
+    if positionArrow and clicked:
+        rightFlipOk = analyseAndFlip(1)
+        leftFlipOk = analyseAndFlip(-1)
+        flipOk = leftFlipOk or rightFlipOk
+    else:
+        flipOk = False
+
+    draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, flipOk)
     #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
     
     pygame.display.flip()
