@@ -51,13 +51,13 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, avail
                 
               #  pygame.draw.circle(window, PLAYER, (positionList[0]+35, positionList[1]+35), 25)
                 
-                if PLAYER==BLACK:
+                if PLAYER==1:
                     stoneSet[i]=1
-                    PLAYER= WHITE
+                    PLAYER= 2
                     
                 else :
                     stoneSet[i]=2
-                    PLAYER=BLACK
+                    PLAYER=1
                     
         else:
             pygame.draw.rect(window, GREEN, positionList)
@@ -72,42 +72,60 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, avail
 
 def available_Moves_horizontal(p, direction, foundOpponent = False):
     p += direction
+    if 0<=p<=63:
+        print "stoneSet[p]:", stoneSet[p]
 
-    print "stoneSet[p]:", stoneSet[p]
+        if not foundOpponent:
+            if PLAYER==1:
+                foundOpponent = stoneSet[p] == 2
+            else:
+                foundOpponent = stoneSet[p] == 1
+                
+        MODULO_OFFSET=1 # Because modulo works best with even numbers
+        LEFT_BORDER_OFFSET=7 # Modulo checks right border, this offset simulates a right border when it is actually the left border
+        TOP_BORDER_OFFSET=0 # smaller than 0 is the top field border
+        BOTTOM_BORDER_OFFSET=63 # bigger than 63 is the bottom field border
 
-    if not foundOpponent:
-        if PLAYER==BLACK:
-            foundOpponent = stoneSet[p] == 2
+        if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0 or (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
+            print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+            return False
+        elif stoneSet[p] == 0:
+            print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+            return False        
+        elif stoneSet[p] == (2 if PLAYER == 2 else 1):
+            print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+            return foundOpponent
         else:
-            foundOpponent = stoneSet[p] == 1
-            
-    MODULO_OFFSET=1 # Because modulo works best with even numbers
-    LEFT_BORDER_OFFSET=7 # Modulo checks right border, this offset simulates a right border when it is actually the left border
-
-    if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0:
-        print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
-        return False
-    elif stoneSet[p] == 0:
-        print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
-        return False        
-    elif stoneSet[p] == (2 if PLAYER == WHITE else 1):
-        print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
-        return foundOpponent
+            print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+            return available_Moves_horizontal(p, direction, foundOpponent)
     else:
-        print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-        return available_Moves_horizontal(p, direction, foundOpponent)
+        None
 
 def available_Moves_horizontal_flip(p, direction, foundOpponent = False):
-    p += direction
-    if stoneSet[p] == (2 if PLAYER == WHITE else 1):
-        print "[FLIP] end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
-        return
+    if 0<=p<=63:
+        p += direction
+        if stoneSet[p] == (2 if PLAYER == 2 else 1):
+            print "[FLIP] end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+            return
+        else:
+            print "[FLIP] coloring and recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+            stoneSet[p] = 2 if PLAYER == 2 else 1
+            return available_Moves_horizontal_flip(p, direction, foundOpponent)
     else:
-        print "[FLIP] coloring and recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-        stoneSet[p] = 2 if PLAYER == WHITE else 1
-        return available_Moves_horizontal_flip(p, direction, foundOpponent)    
+        None
+    
+def analyseAndFlip(direction):
+    print "--- analysis start --- PLAYER: {}".format("BLACK" if PLAYER == 1 else "WHITE")
+    flipOk = available_Moves_horizontal(positionArrow, direction)
 
+    if flipOk:
+        print "--- flip start --- PLAYER: {}".format("BLACK" if PLAYER == 1 else "WHITE")
+        available_Moves_horizontal_flip(positionArrow, direction)
+        print "--- flip end --- PLAYER: {}".format("BLACK" if PLAYER == 1 else "WHITE")        
 
+    print "--- analysis end --- PLAYER: {}".format("BLACK" if PLAYER == 1 else "WHITE")
+    print
+    return flipOk
            
     #circle(Surface, color, pos, radius, width=0)
 def draw_buttons(mouseX, mouseY, clicked):
@@ -138,7 +156,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GREY  = (160,160,160)
 
-PLAYER = BLACK
+PLAYER = 1
 
 # first call of functions
 allPositionsRect = calculate_position()
@@ -159,20 +177,6 @@ stoneSet[10] = 2
 stoneSet[12] = 2
 stoneSet[13] = 1
 
-
-def analyseAndFlip(direction):
-    print "--- analysis start --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")
-    flipOk = available_Moves_horizontal(positionArrow, direction)
-
-    if flipOk:
-        print "--- flip start --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")
-        available_Moves_horizontal_flip(positionArrow, direction)
-        print "--- flip end --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")        
-
-    print "--- analysis end --- PLAYER: {}".format("BLACK" if PLAYER == BLACK else "WHITE")
-    print
-    return flipOk
-
 gameLoop=True
 while gameLoop:
 
@@ -187,14 +191,21 @@ while gameLoop:
 
     #flipOk = analyseAndFlip(1) if positionArrow and clicked else False
 
-    if positionArrow and clicked:
+    if positionArrow and clicked and stoneSet[positionArrow]==0:
         rightFlipOk = analyseAndFlip(1)
         leftFlipOk = analyseAndFlip(-1)
-        flipOk = leftFlipOk or rightFlipOk
+        upFlipOk = analyseAndFlip(8)
+        downFlipOk = analyseAndFlip(-8)
+        sevenFlipOk = analyseAndFlip(7)
+        sevendownFlipOk = analyseAndFlip(-7)
+        nineFlipOk= analyseAndFlip(9)
+        ninedownFlipOk= analyseAndFlip(-9)
+        flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
     else:
         flipOk = False
 
     draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, flipOk)
+    
     #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
     
     pygame.display.flip()
