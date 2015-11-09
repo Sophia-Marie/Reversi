@@ -144,7 +144,7 @@ def draw_buttons(mouseX, mouseY, clicked):
     mousePosition= pygame.mouse.get_pos()
     
     if 100 > mouseX > 50 and 70 > mouseY > 50 and clicked==1:
-        pygame.draw.rect(window, GREY, (50,50,50,20))
+        pygame.draw.rect(window, GREY, (50,50,80,20))
         global stoneSet
         stoneSet = stones_set()
         #Grundaufstellung wiederherstellen    
@@ -152,10 +152,10 @@ def draw_buttons(mouseX, mouseY, clicked):
         stoneSet[28] = 2
         stoneSet[35] = 2
         stoneSet[36] = 1
-        print "lulu"
+        print "new game"
         
     else:
-        pygame.draw.rect(window, WHITE, (50, 50, 50, 20))
+        pygame.draw.rect(window, WHITE, (50, 50, 80, 20))
 
     # New Game Button
     
@@ -202,11 +202,11 @@ stoneSet[28] = 2
 stoneSet[35] = 2
 stoneSet[36] = 1
 
-# Test
-stoneSet[9] = 1
-stoneSet[10] = 2
-stoneSet[12] = 2
-stoneSet[13] = 1
+### Test
+##stoneSet[9] = 1
+##stoneSet[10] = 2
+##stoneSet[12] = 2
+##stoneSet[13] = 1
 
 gameLoop=True
 ##init=True
