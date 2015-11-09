@@ -1,5 +1,5 @@
 import pygame
-
+from time import sleep
 
 # to do: Regeln und 2 Spieler sollen spielen können.
 
@@ -40,13 +40,14 @@ def calculate_position():
 
 
 def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, availableMove):
-    
     global PLAYER
     
     for i, positionList in enumerate(allPositionsRect):
         
         if positionArrow==i:
+
             pygame.draw.rect(window, PINK, positionList)
+
             if clicked==1 and stoneSet[i]==0 and availableMove==True:
                 
               #  pygame.draw.circle(window, PLAYER, (positionList[0]+35, positionList[1]+35), 25)
@@ -68,7 +69,6 @@ def draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, avail
             pygame.draw.circle(window, WHITE,(positionList[0]+35, positionList[1]+35), 25)
         else:
             pass
-#Klasse draw_field:
 
 def available_Moves_horizontal(p, direction, foundOpponent = False):
     p += direction
@@ -128,15 +128,49 @@ def analyseAndFlip(direction):
     return flipOk
            
     #circle(Surface, color, pos, radius, width=0)
+
+def calc_occupied_stones():
+    occupiedBlack=0
+    occupiedWhite=0
+    for i in stoneSet:
+        if i == 1:
+            occupiedBlack+=1
+        elif i == 2:
+            occupiedWhite+=1
+
+    return occupiedBlack, occupiedWhite
+
 def draw_buttons(mouseX, mouseY, clicked):
     mousePosition= pygame.mouse.get_pos()
-    # New Game Button
+    
     if 100 > mouseX > 50 and 70 > mouseY > 50 and clicked==1:
         pygame.draw.rect(window, GREY, (50,50,50,20))
+        global stoneSet
+        stoneSet = stones_set()
+        #Grundaufstellung wiederherstellen    
+        stoneSet[27] = 1
+        stoneSet[28] = 2
+        stoneSet[35] = 2
+        stoneSet[36] = 1
+        print "lulu"
         
     else:
         pygame.draw.rect(window, WHITE, (50, 50, 50, 20))
 
+    # New Game Button
+    
+    resetFont= pygame.font.Font(None, 16)
+    resetText= resetFont.render("New Game", 1, BLACK)
+    window.blit(resetText, (50,50,50,50))
+
+def show_text(occupiedBlack, occupiedWhite):
+    blackFont=pygame.font.Font(None, 18)
+    blackText=blackFont.render("Player Black: {}".format(occupiedBlack), 1, BLACK)
+    window.blit(blackText, (640,50,20,20))
+    whiteFont=pygame.font.Font(None, 18)
+    whiteText=blackFont.render("Player White: {}".format(occupiedWhite), 1, WHITE)
+    window.blit(whiteText, (640,70,20,20))
+##    = resetFont.render("{} , {}".format(a,b), 1, BLACK)
 
 
 pygame.init()
@@ -162,9 +196,6 @@ PLAYER = 1
 allPositionsRect = calculate_position()
 stoneSet= stones_set()
 
-#Klasse:
-window.fill(BROWN)
-
 #Grundaufstellung
 stoneSet[27] = 1
 stoneSet[28] = 2
@@ -178,14 +209,21 @@ stoneSet[12] = 2
 stoneSet[13] = 1
 
 gameLoop=True
+##init=True
 while gameLoop:
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameLoop=False
             
     mouseX, mouseY = get_mouse_position()
     clicked = check_mouse_pressed()
+
+##    if not init and not clicked:
+##        sleep(0.01)
+##        continue
+
+    window.fill(BROWN)
+    
     draw_buttons(mouseX, mouseY, clicked)
     positionArrow = check_mouse_position(allPositionsRect, mouseX, mouseY)
 
@@ -205,9 +243,14 @@ while gameLoop:
         flipOk = False
 
     draw_Field(window, allPositionsRect, positionArrow, stoneSet, clicked, flipOk)
+
+    occupiedBlack,occupiedWhite = calc_occupied_stones()
+    show_text(occupiedBlack,occupiedWhite)
     
     #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
     
     pygame.display.flip()
+
+##    init = False
     
 pygame.quit()
