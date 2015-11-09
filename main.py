@@ -199,6 +199,12 @@ def show_text(occupiedBlack, occupiedWhite):
     whiteFont=pygame.font.Font(None, 18)
     whiteText=blackFont.render("Player White: {}".format(occupiedWhite), 1, WHITE)
     window.blit(whiteText, (640,70,20,20))
+    showPlayerFont=pygame.font.Font(None, 18)
+    if PLAYER==1:
+        showPlayerText=showPlayerFont.render("BLACK player's turn!", 1, BLACK)
+    else:
+        showPlayerText=showPlayerFont.render("WHITE player's turn!", 1, WHITE)
+    window.blit(showPlayerText, (350,50,200,20))
 ##    = resetFont.render("{} , {}".format(a,b), 1, BLACK)
 
 
