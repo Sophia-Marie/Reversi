@@ -1,8 +1,6 @@
 import pygame
 from time import sleep
 
-# to do: Regeln und 2 Spieler sollen spielen können.
-
 def check_mouse_position(allPositionsRect, mouseX, mouseY):
     for i, positionList, in enumerate(allPositionsRect):
         if positionList[0] < mouseX < positionList[0]+positionList[2] and positionList[1] < mouseY < positionList[1]+positionList[3]:
@@ -86,18 +84,49 @@ def available_Moves_horizontal(p, direction, foundOpponent = False):
         TOP_BORDER_OFFSET=0 # smaller than 0 is the top field border
         BOTTOM_BORDER_OFFSET=63 # bigger than 63 is the bottom field border
 
-        if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0 or (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
-            print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
-            return False
-        elif stoneSet[p] == 0:
-            print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
-            return False        
-        elif stoneSet[p] == (2 if PLAYER == 2 else 1):
-            print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
-            return foundOpponent
+        if direction==-8 or direction==8:
+
+            if (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
+                print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+                return False
+            elif stoneSet[p] == 0:
+                print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+                return False        
+            elif stoneSet[p] == (2 if PLAYER == 2 else 1):
+                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                return foundOpponent
+            else:
+                print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+                return available_Moves_horizontal(p, direction, foundOpponent)
+            
+        if direction==-1 or direction==1:
+            
+            if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0:
+                print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+                return False
+            elif stoneSet[p] == 0:
+                print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+                return False        
+            elif stoneSet[p] == (2 if PLAYER == 2 else 1):
+                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                return foundOpponent
+            else:
+                print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+                return available_Moves_horizontal(p, direction, foundOpponent)
         else:
-            print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-            return available_Moves_horizontal(p, direction, foundOpponent)
+            
+            if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0 or (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
+                print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+                return False
+            elif stoneSet[p] == 0:
+                print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+                return False        
+            elif stoneSet[p] == (2 if PLAYER == 2 else 1):
+                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                return foundOpponent
+            else:
+                print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+                return available_Moves_horizontal(p, direction, foundOpponent)
     else:
         None
 
