@@ -11,6 +11,17 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GREY  = (160,160,160)
 
+def asciiPrintGameField(stoneSet):
+    for i, s in enumerate(stoneSet):
+        if s == 1:
+            print u"\u25CF",
+        elif s == 2:
+            print u"\u25CB",
+        else:
+            print u"\u25A1",
+        if (i+1) % 8 == 0:
+            print
+
 def check_mouse_position(allPositionsRect, mouseX, mouseY):
     for i, positionList, in enumerate(allPositionsRect):
         if positionList[0] < mouseX < positionList[0]+positionList[2] and positionList[1] < mouseY < positionList[1]+positionList[3]:
@@ -38,7 +49,7 @@ def basic_lineup(stoneSet):
     newStoneSet[35] = 2
     newStoneSet[36] = 1
     return newStoneSet
-    
+
 def calculate_position():
     positionList = [100, 100, 70, 70]
     allPositions=[list(positionList)]
@@ -54,10 +65,9 @@ def calculate_position():
     return allPositions
 
 
-def draw_Field(window, player, allPositionsRect, positionArrow, stoneSet, clicked, availableMove):
+def draw_Field(window, player, allPositionsRect, positionArrow, stoneSet, clicked):
     
     for i, positionList in enumerate(allPositionsRect):
-        
         if positionArrow==i:
             pygame.draw.rect(window, PINK, positionList)
         else:
@@ -203,6 +213,26 @@ def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
     window.blit(showPlayerText, (350,50,200,20))
 ##    = resetFont.render("{} , {}".format(a,b), 1, BLACK)
 
+def flip_for_all_directions(stoneSet, currentPlayer, positionArrow):
+    rightFlipOk = analyseAndFlip(stoneSet, 1, currentPlayer, positionArrow)
+    leftFlipOk = analyseAndFlip(stoneSet, -1, currentPlayer, positionArrow)
+    upFlipOk = analyseAndFlip(stoneSet, 8, currentPlayer, positionArrow)
+    downFlipOk = analyseAndFlip(stoneSet, -8, currentPlayer, positionArrow)
+    sevenFlipOk = analyseAndFlip(stoneSet, 7, currentPlayer, positionArrow)
+    sevendownFlipOk = analyseAndFlip(stoneSet, -7, currentPlayer, positionArrow)
+    nineFlipOk= analyseAndFlip(stoneSet, 9, currentPlayer, positionArrow)
+    ninedownFlipOk= analyseAndFlip(stoneSet, -9, currentPlayer, positionArrow)
+    flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
+    return flipOk
+
+def flip(stoneSet, currentPlayer, positionArrow):    
+    flipOk = flip_for_all_directions(stoneSet, currentPlayer, positionArrow)
+
+    if flipOk:
+        stoneSet[positionArrow] = currentPlayer
+
+    return flipOk
+
 # ---------------------------------------------------------------------
 
 def main():
@@ -246,35 +276,24 @@ def main():
 
         positionArrow = check_mouse_position(allPositionsRect, mouseX, mouseY)
 
-        #flipOk = analyseAndFlip(1) if positionArrow and clicked else False
-
-        if positionArrow and clicked and stoneSet[positionArrow]==0:
-            rightFlipOk = analyseAndFlip(stoneSet, 1, currentPlayer, positionArrow)
-            leftFlipOk = analyseAndFlip(stoneSet, -1, currentPlayer, positionArrow)
-            upFlipOk = analyseAndFlip(stoneSet, 8, currentPlayer, positionArrow)
-            downFlipOk = analyseAndFlip(stoneSet, -8, currentPlayer, positionArrow)
-            sevenFlipOk = analyseAndFlip(stoneSet, 7, currentPlayer, positionArrow)
-            sevendownFlipOk = analyseAndFlip(stoneSet, -7, currentPlayer, positionArrow)
-            nineFlipOk= analyseAndFlip(stoneSet, 9, currentPlayer, positionArrow)
-            ninedownFlipOk= analyseAndFlip(stoneSet, -9, currentPlayer, positionArrow)
-            flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
-
+        if positionArrow != None and clicked and stoneSet[positionArrow]==0:
+            flipOk = flip(stoneSet, currentPlayer, positionArrow)
             if flipOk:
-                stoneSet[positionArrow] = currentPlayer
                 if currentPlayer == 1:
                     currentPlayer = 2
                 else:
                     currentPlayer = 1
-            
-        else:
-            flipOk = False
 
-        draw_Field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked, flipOk)
+        draw_Field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
 
         occupiedBlack,occupiedWhite = calc_occupied_stones(stoneSet)
         show_text(window, currentPlayer, occupiedBlack, occupiedWhite)
+
+        if occupiedBlack + occupiedWhite == 64:
+            # TODO
+            #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
+            print "Game over"
         
-        #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
         
         pygame.display.flip()
 
@@ -285,7 +304,7 @@ def main():
 class TestPlacement(unittest.TestCase):
     def setUp(self):
         self.stoneSet = stones_set()
-
+        
     def test_calc_occupied_stones_empty(self):
         black, white = calc_occupied_stones(self.stoneSet)
         self.assertEqual(black, 0)
@@ -298,6 +317,99 @@ class TestPlacement(unittest.TestCase):
         black, white = calc_occupied_stones(self.stoneSet)
         self.assertEqual(black, 3)
         self.assertEqual(white, 2)
+
+    def test_first_flip(self):
+        expectedStoneSet = stones_set()
+        expectedStoneSet[27] = 1
+        expectedStoneSet[28] = 1
+        expectedStoneSet[29] = 1
+        expectedStoneSet[35] = 2
+        expectedStoneSet[36] = 1
+        
+        self.stoneSet = basic_lineup(self.stoneSet)
+        flip(self.stoneSet, 1, 29)
+        self.assertListEqual(expectedStoneSet, self.stoneSet)
+
+    def test_second_flip(self):
+        expectedStoneSet = stones_set()
+        expectedStoneSet[21] = 2
+        expectedStoneSet[27] = 1
+        expectedStoneSet[28] = 2
+        expectedStoneSet[29] = 1
+        expectedStoneSet[35] = 2
+        expectedStoneSet[36] = 1
+        
+        self.stoneSet = basic_lineup(self.stoneSet)
+        flip(self.stoneSet, 1, 29)
+        flip(self.stoneSet, 2, 21)
+        self.assertListEqual(expectedStoneSet, self.stoneSet)
+
+        asciiPrintGameField(self.stoneSet)
+
+    def test_upper_left_corner(self):
+        expectedStoneSet = stones_set()
+        expectedStoneSet[0] = 1
+        expectedStoneSet[1] = 1
+        expectedStoneSet[2] = 1
+
+        self.stoneSet[1] = 2
+        self.stoneSet[2] = 1
+
+        flip(self.stoneSet, 1, 0)
+        self.assertListEqual(expectedStoneSet, self.stoneSet)
+
+    def test_bug_situation_1(self):
+        # Up
+        #self.stoneSet[2:59:8] = [2,2,2,2,2,2,2,2]
+        self.stoneSet[ 2] = 2
+        self.stoneSet[10] = 2
+        self.stoneSet[18] = 2
+        self.stoneSet[26] = 2
+        self.stoneSet[34] = 2
+        self.stoneSet[42] = 2
+        self.stoneSet[50] = 2
+
+        # To be clicked
+        self.stoneSet[58] = 0
+
+        # Up + Right
+        self.stoneSet[51] = 2
+        self.stoneSet[44] = 2
+        self.stoneSet[37] = 2
+
+        # Right
+        self.stoneSet[59] = 1
+        self.stoneSet[60] = 1
+        self.stoneSet[61] = 1
+
+        # Left
+        self.stoneSet[57] = 2
+        self.stoneSet[56] = 1
+
+        # Up + Left
+        self.stoneSet[49] = 2
+        self.stoneSet[40] = 1
+
+        print "Before:"
+        asciiPrintGameField(self.stoneSet)
+        print
+
+        expectedStoneSet = list(self.stoneSet)
+        expectedStoneSet[58] = 1
+        expectedStoneSet[57] = 1
+        expectedStoneSet[49] = 1
+
+        print "Expected:"
+        asciiPrintGameField(expectedStoneSet)
+        print
+
+        flip(self.stoneSet, 1, 58)
+
+        print "After:"
+        asciiPrintGameField(self.stoneSet)
+        print
+
+        self.assertListEqual(expectedStoneSet, self.stoneSet)
 
 if __name__ == '__main__':
     TESTING = False
