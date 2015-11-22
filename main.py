@@ -11,6 +11,8 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GREY  = (160,160,160)
 
+DEBUG = False
+
 def asciiPrintGameField(stoneSet):
     for i, s in enumerate(stoneSet):
         if s == 1:
@@ -95,7 +97,7 @@ def any_available_move_for_next_player(stoneSet, player):
 def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = False):
     p += direction
     if 0<=p<=63:
-        print "stoneSet[p]:", stoneSet[p]
+        if DEBUG:    print "stoneSet[p]:", stoneSet[p]
 
         if not foundOpponent:
             if player==1:
@@ -110,43 +112,43 @@ def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = F
 
         if direction==-8 or direction==8:
             if stoneSet[p] == (2 if player == 2 else 1):
-                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
                 return foundOpponent
             elif (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
-                print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False
             elif stoneSet[p] == 0:
-                print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False        
             else:
-                print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
                 return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
             
         if direction==-1 or direction==1:
             if stoneSet[p] == (2 if player == 2 else 1):
-                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
                 return foundOpponent
             elif (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0:
-                print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False
             elif stoneSet[p] == 0:
-                print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False        
             else:
-                print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
                 return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
         else:
             if stoneSet[p] == (2 if player == 2 else 1):
-                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
                 return foundOpponent
             elif (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0 or (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
-                print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False
             elif stoneSet[p] == 0:
-                print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False        
             else:
-                print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+                if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
                 return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
     else:
         None
@@ -155,35 +157,27 @@ def available_Moves_horizontal_flip(stoneSet, player, p, direction, foundOpponen
     if 0<=p<=63:
         p += direction
         if stoneSet[p] == (2 if player == 2 else 1):
-            print "[FLIP] end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+            if DEBUG:    print "[FLIP] end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
             return
         else:
-            print "[FLIP] coloring and recursive call p={}, foundOpponent={}".format(p, foundOpponent)
+            if DEBUG:    print "[FLIP] coloring and recursive call p={}, foundOpponent={}".format(p, foundOpponent)
             stoneSet[p] = 2 if player == 2 else 1
             return available_Moves_horizontal_flip(stoneSet, player, p, direction, foundOpponent)
     else:
         None
     
-def analyseAndFlip(stoneSet, direction, player, positionArrow):
-    print "--- analysis start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
+def analyse(stoneSet, direction, player, positionArrow, doFlip):
+    if DEBUG:    print "--- analysis start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
     flipOk = available_Moves_horizontal(stoneSet, player, positionArrow, direction)
 
-    if flipOk:
-        print "--- flip start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
+    if flipOk and doFlip:
+        if DEBUG:    print "--- flip start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
         available_Moves_horizontal_flip(stoneSet, player, positionArrow, direction)
-        print "--- flip end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")        
+        if DEBUG:    print "--- flip end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")        
 
-    print "--- analysis end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
-    print
+    if DEBUG:    print "--- analysis end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
+    if DEBUG:    print
     return flipOk
-
-def analyse_only(stoneSet, direction, player, positionArrow):
-    print "--- analysis(only) start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
-    flipOk = available_Moves_horizontal(stoneSet, player, positionArrow, direction)
-    
-    return flipOk
-           
-    #circle(Surface, color, pos, radius, width=0)
 
 def calc_occupied_stones(stoneSet):
     occupiedBlack=0
@@ -207,7 +201,6 @@ def draw_buttons(window, mouseX, mouseY, clicked):
         pygame.draw.rect(window, WHITE, (50, 50, 80, 20))
 
     # New Game Button
-    
     resetFont= pygame.font.Font(None, 16)
     resetText= resetFont.render("New Game", 1, BLACK)
     window.blit(resetText, (50,50,50,50))
@@ -228,29 +221,23 @@ def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
     window.blit(showPlayerText, (350,50,200,20))
 ##    = resetFont.render("{} , {}".format(a,b), 1, BLACK)
 
-def flip_for_all_directions(stoneSet, currentPlayer, positionArrow):
-    rightFlipOk = analyseAndFlip(stoneSet, 1, currentPlayer, positionArrow)
-    leftFlipOk = analyseAndFlip(stoneSet, -1, currentPlayer, positionArrow)
-    upFlipOk = analyseAndFlip(stoneSet, 8, currentPlayer, positionArrow)
-    downFlipOk = analyseAndFlip(stoneSet, -8, currentPlayer, positionArrow)
-    sevenFlipOk = analyseAndFlip(stoneSet, 7, currentPlayer, positionArrow)
-    sevendownFlipOk = analyseAndFlip(stoneSet, -7, currentPlayer, positionArrow)
-    nineFlipOk= analyseAndFlip(stoneSet, 9, currentPlayer, positionArrow)
-    ninedownFlipOk= analyseAndFlip(stoneSet, -9, currentPlayer, positionArrow)
+def for_all_directions(stoneSet, currentPlayer, positionArrow, doFlip):
+    rightFlipOk = analyse(stoneSet, 1, currentPlayer, positionArrow, doFlip)
+    leftFlipOk = analyse(stoneSet, -1, currentPlayer, positionArrow, doFlip)
+    upFlipOk = analyse(stoneSet, 8, currentPlayer, positionArrow, doFlip)
+    downFlipOk = analyse(stoneSet, -8, currentPlayer, positionArrow, doFlip)
+    sevenFlipOk = analyse(stoneSet, 7, currentPlayer, positionArrow, doFlip)
+    sevendownFlipOk = analyse(stoneSet, -7, currentPlayer, positionArrow, doFlip)
+    nineFlipOk= analyse(stoneSet, 9, currentPlayer, positionArrow, doFlip)
+    ninedownFlipOk= analyse(stoneSet, -9, currentPlayer, positionArrow, doFlip)
     flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
     return flipOk
 
+def flip_for_all_directions(stoneSet, currentPlayer, positionArrow):
+    return for_all_directions(stoneSet, currentPlayer, positionArrow, True)
+
 def only_analyse_for_all_directions(stoneSet, currentPlayer, positionArrow):
-    rightFlipOk = analyse_only(stoneSet, 1, currentPlayer, positionArrow)
-    leftFlipOk = analyse_only(stoneSet, -1, currentPlayer, positionArrow)
-    upFlipOk = analyse_only(stoneSet, 8, currentPlayer, positionArrow)
-    downFlipOk = analyse_only(stoneSet, -8, currentPlayer, positionArrow)
-    sevenFlipOk = analyse_only(stoneSet, 7, currentPlayer, positionArrow)
-    sevendownFlipOk = analyse_only(stoneSet, -7, currentPlayer, positionArrow)
-    nineFlipOk= analyse_only(stoneSet, 9, currentPlayer, positionArrow)
-    ninedownFlipOk= analyse_only(stoneSet, -9, currentPlayer, positionArrow)
-    flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
-    return flipOk
+    return for_all_directions(stoneSet, currentPlayer, positionArrow, False)
 
 def flip(stoneSet, currentPlayer, positionArrow):    
     flipOk = flip_for_all_directions(stoneSet, currentPlayer, positionArrow)
@@ -392,6 +379,7 @@ class TestPlacement(unittest.TestCase):
         flip(self.stoneSet, 2, 21)
         self.assertListEqual(expectedStoneSet, self.stoneSet)
 
+        print
         asciiPrintGameField(self.stoneSet)
 
     def test_upper_left_corner(self):
