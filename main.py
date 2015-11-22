@@ -197,10 +197,10 @@ def draw_buttons(window, mouseX, mouseY, clicked):
 
 def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
     blackFont=pygame.font.Font(None, 18)
-    blackText=blackFont.render("Player Black: {}".format(occupiedBlack), 1, BLACK)
+    blackText=blackFont.render("Black Stones: {}".format(occupiedBlack), 1, BLACK)
     window.blit(blackText, (640,50,20,20))
     whiteFont=pygame.font.Font(None, 18)
-    whiteText=blackFont.render("Player White: {}".format(occupiedWhite), 1, WHITE)
+    whiteText=blackFont.render("White Stones: {}".format(occupiedWhite), 1, WHITE)
     window.blit(whiteText, (640,70,20,20))
     showPlayerFont=pygame.font.Font(None, 18)
     if currentPlayer==1:
@@ -230,6 +230,23 @@ def flip(stoneSet, currentPlayer, positionArrow):
 
     return flipOk
 
+def show_winner(occupiedWhite,occupiedBlack):
+    windowWinner = pygame.display.set_mode((250,100))
+    pygame.display.set_caption("Winner")
+    windowWinner.fill(GREY)
+    if occupiedWhite>occupiedBlack:
+        winnerFont=pygame.font.Font(None, 18)
+        winnerText=winnerFont.render("Player White wins, gratulations!", 1, BLACK)
+        windowWinner.blit(winnerText, (10,50,20,20))
+    elif occupiedBlack>occupiedWhite:
+        winnerFont=pygame.font.Font(None, 18)
+        winnerText=winnerFont.render("Player Black wins, gratulations!", 1, BLACK)
+        windowWinner.blit(winnerText, (10,50,20,20)) 
+    else:
+        winnerFont=pygame.font.Font(None, 18)
+        winnerText=winnerFont.render("No Player wins, it is a tie!", 1, BLACK)
+        windowWinner.blit(winnerText, (10,50,20,20))
+        
 # ---------------------------------------------------------------------
 
 def main():
@@ -287,10 +304,7 @@ def main():
         show_text(window, currentPlayer, occupiedBlack, occupiedWhite)
 
         if occupiedBlack + occupiedWhite == 64:
-            # TODO
-            #wenn alle aus stoneset nicht 0, dann der der am meisten Steine hat gewinnt.
-            print "Game over"
-        
+            show_winner(occupiedWhite, occupiedBlack)
         
         pygame.display.flip()
 
@@ -409,7 +423,7 @@ class TestPlacement(unittest.TestCase):
         self.assertListEqual(expectedStoneSet, self.stoneSet)
 
 if __name__ == '__main__':
-    TESTING = True
+    TESTING = False
 
     if TESTING:
         unittest.main()
