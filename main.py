@@ -80,6 +80,18 @@ def draw_Field(window, player, allPositionsRect, positionArrow, stoneSet, clicke
         else:
             pass
 
+def any_available_move_for_next_player(stoneSet, player):
+    if player == 1:
+        nextPlayer=2
+    else:
+        nextPlayer=1
+
+    for i, stone in enumerate(stoneSet):
+        if stone == 0:
+            if only_analyse_for_all_directions(stoneSet, nextPlayer, i):
+                return True
+    return False
+    
 def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = False):
     p += direction
     if 0<=p<=63:
@@ -164,6 +176,12 @@ def analyseAndFlip(stoneSet, direction, player, positionArrow):
     print "--- analysis end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
     print
     return flipOk
+
+def analyse_only(stoneSet, direction, player, positionArrow):
+    print "--- analysis(only) start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
+    flipOk = available_Moves_horizontal(stoneSet, player, positionArrow, direction)
+    
+    return flipOk
            
     #circle(Surface, color, pos, radius, width=0)
 
@@ -222,6 +240,18 @@ def flip_for_all_directions(stoneSet, currentPlayer, positionArrow):
     flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
     return flipOk
 
+def only_analyse_for_all_directions(stoneSet, currentPlayer, positionArrow):
+    rightFlipOk = analyse_only(stoneSet, 1, currentPlayer, positionArrow)
+    leftFlipOk = analyse_only(stoneSet, -1, currentPlayer, positionArrow)
+    upFlipOk = analyse_only(stoneSet, 8, currentPlayer, positionArrow)
+    downFlipOk = analyse_only(stoneSet, -8, currentPlayer, positionArrow)
+    sevenFlipOk = analyse_only(stoneSet, 7, currentPlayer, positionArrow)
+    sevendownFlipOk = analyse_only(stoneSet, -7, currentPlayer, positionArrow)
+    nineFlipOk= analyse_only(stoneSet, 9, currentPlayer, positionArrow)
+    ninedownFlipOk= analyse_only(stoneSet, -9, currentPlayer, positionArrow)
+    flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
+    return flipOk
+
 def flip(stoneSet, currentPlayer, positionArrow):    
     flipOk = flip_for_all_directions(stoneSet, currentPlayer, positionArrow)
 
@@ -236,11 +266,11 @@ def show_winner(occupiedWhite,occupiedBlack):
     windowWinner.fill(GREY)
     if occupiedWhite>occupiedBlack:
         winnerFont=pygame.font.Font(None, 18)
-        winnerText=winnerFont.render("Player White wins, gratulations!", 1, BLACK)
+        winnerText=winnerFont.render("Player White wins, congratulations!", 1, BLACK)
         windowWinner.blit(winnerText, (10,50,20,20))
     elif occupiedBlack>occupiedWhite:
         winnerFont=pygame.font.Font(None, 18)
-        winnerText=winnerFont.render("Player Black wins, gratulations!", 1, BLACK)
+        winnerText=winnerFont.render("Player Black wins, congratulations!", 1, BLACK)
         windowWinner.blit(winnerText, (10,50,20,20)) 
     else:
         winnerFont=pygame.font.Font(None, 18)
@@ -293,10 +323,17 @@ def main():
         if positionArrow != None and clicked and stoneSet[positionArrow]==0:
             flipOk = flip(stoneSet, currentPlayer, positionArrow)
             if flipOk:
+                availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
                 if currentPlayer == 1:
-                    currentPlayer = 2
+                    if not availableMove:
+                        currentPlayer = 1
+                    else:
+                        currentPlayer=2
                 else:
-                    currentPlayer = 1
+                    if not availableMove:
+                        currentPlayer = 2
+                    else:
+                        currentPlayer = 1 
 
         draw_Field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
 
@@ -369,9 +406,16 @@ class TestPlacement(unittest.TestCase):
         flip(self.stoneSet, 1, 0)
         self.assertListEqual(expectedStoneSet, self.stoneSet)
 
+    def test_any_available_move(self):
+        availableMove = any_available_move_for_next_player(self.stoneSet, 1)
+        self.assertFalse(availableMove)
+
+        self.stoneSet = basic_lineup(self.stoneSet)
+        availableMove = any_available_move_for_next_player(self.stoneSet, 1)
+        self.assertTrue(availableMove)
+
     def test_bug_situation_1(self):
         # Up
-        #self.stoneSet[2:59:8] = [2,2,2,2,2,2,2,2]
         self.stoneSet[ 2] = 2
         self.stoneSet[10] = 2
         self.stoneSet[18] = 2
@@ -424,6 +468,7 @@ class TestPlacement(unittest.TestCase):
 
 if __name__ == '__main__':
     TESTING = False
+    #TESTING = True
 
     if TESTING:
         unittest.main()
