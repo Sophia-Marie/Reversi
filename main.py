@@ -97,45 +97,42 @@ def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = F
         BOTTOM_BORDER_OFFSET=63 # bigger than 63 is the bottom field border
 
         if direction==-8 or direction==8:
-
-            if (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
+            if stoneSet[p] == (2 if player == 2 else 1):
+                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                return foundOpponent
+            elif (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
                 print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False
             elif stoneSet[p] == 0:
                 print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False        
-            elif stoneSet[p] == (2 if player == 2 else 1):
-                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
-                return foundOpponent
             else:
                 print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
                 return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
             
         if direction==-1 or direction==1:
-            
-            if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0:
+            if stoneSet[p] == (2 if player == 2 else 1):
+                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                return foundOpponent
+            elif (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0:
                 print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False
             elif stoneSet[p] == 0:
                 print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False        
-            elif stoneSet[p] == (2 if player == 2 else 1):
-                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
-                return foundOpponent
             else:
                 print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
                 return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
         else:
-            
-            if (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0 or (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
+            if stoneSet[p] == (2 if player == 2 else 1):
+                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
+                return foundOpponent
+            elif (p+MODULO_OFFSET)%8 == 0 or (p+MODULO_OFFSET+LEFT_BORDER_OFFSET)%8 == 0 or (p>BOTTOM_BORDER_OFFSET) or (p<TOP_BORDER_OFFSET):
                 print "end of recursion (border) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False
             elif stoneSet[p] == 0:
                 print "end of recursion (empty field) p={}, foundOpponent={}".format(p, foundOpponent)
                 return False        
-            elif stoneSet[p] == (2 if player == 2 else 1):
-                print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
-                return foundOpponent
             else:
                 print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
                 return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
@@ -412,7 +409,7 @@ class TestPlacement(unittest.TestCase):
         self.assertListEqual(expectedStoneSet, self.stoneSet)
 
 if __name__ == '__main__':
-    TESTING = False
+    TESTING = True
 
     if TESTING:
         unittest.main()
