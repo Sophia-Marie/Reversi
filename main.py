@@ -10,6 +10,7 @@ BROWN = (80,26,26)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 GREY  = (160,160,160)
+ORANGE= (255,128,0)
 
 DEBUG = False
 
@@ -179,48 +180,6 @@ def analyse(stoneSet, direction, player, positionArrow, doFlip):
     if DEBUG:    print
     return flipOk
 
-def calc_occupied_stones(stoneSet):
-    occupiedBlack=0
-    occupiedWhite=0
-    for i in stoneSet:
-        if i == 1:
-            occupiedBlack+=1
-        elif i == 2:
-            occupiedWhite+=1
-
-    return occupiedBlack, occupiedWhite
-
-def draw_buttons(window, mouseX, mouseY, clicked):
-    newGameButtonClicked = False
-    mousePosition= pygame.mouse.get_pos()
-    
-    if 100 > mouseX > 50 and 70 > mouseY > 50 and clicked==1:
-        pygame.draw.rect(window, GREY, (50,50,80,20))
-        newGameButtonClicked = True
-    else:
-        pygame.draw.rect(window, WHITE, (50, 50, 80, 20))
-
-    # New Game Button
-    resetFont= pygame.font.Font(None, 16)
-    resetText= resetFont.render("New Game", 1, BLACK)
-    window.blit(resetText, (50,50,50,50))
-    return newGameButtonClicked
-
-def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
-    blackFont=pygame.font.Font(None, 18)
-    blackText=blackFont.render("Black Stones: {}".format(occupiedBlack), 1, BLACK)
-    window.blit(blackText, (640,50,20,20))
-    whiteFont=pygame.font.Font(None, 18)
-    whiteText=blackFont.render("White Stones: {}".format(occupiedWhite), 1, WHITE)
-    window.blit(whiteText, (640,70,20,20))
-    showPlayerFont=pygame.font.Font(None, 18)
-    if currentPlayer==1:
-        showPlayerText=showPlayerFont.render("BLACK player's turn!", 1, BLACK)
-    else:
-        showPlayerText=showPlayerFont.render("WHITE player's turn!", 1, WHITE)
-    window.blit(showPlayerText, (350,50,200,20))
-##    = resetFont.render("{} , {}".format(a,b), 1, BLACK)
-
 def for_all_directions(stoneSet, currentPlayer, positionArrow, doFlip):
     rightFlipOk = analyse(stoneSet, 1, currentPlayer, positionArrow, doFlip)
     leftFlipOk = analyse(stoneSet, -1, currentPlayer, positionArrow, doFlip)
@@ -247,22 +206,82 @@ def flip(stoneSet, currentPlayer, positionArrow):
 
     return flipOk
 
-def show_winner(occupiedWhite,occupiedBlack):
-    windowWinner = pygame.display.set_mode((250,100))
-    pygame.display.set_caption("Winner")
-    windowWinner.fill(GREY)
-    if occupiedWhite>occupiedBlack:
-        winnerFont=pygame.font.Font(None, 18)
-        winnerText=winnerFont.render("Player White wins, congratulations!", 1, BLACK)
-        windowWinner.blit(winnerText, (10,50,20,20))
-    elif occupiedBlack>occupiedWhite:
-        winnerFont=pygame.font.Font(None, 18)
-        winnerText=winnerFont.render("Player Black wins, congratulations!", 1, BLACK)
-        windowWinner.blit(winnerText, (10,50,20,20)) 
+def calc_occupied_stones(stoneSet):
+    occupiedBlack=0
+    occupiedWhite=0
+    for i in stoneSet:
+        if i == 1:
+            occupiedBlack+=1
+        elif i == 2:
+            occupiedWhite+=1
+
+    return occupiedBlack, occupiedWhite
+
+def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver):
+    newGameButtonClicked = False
+    mousePosition= pygame.mouse.get_pos()
+    
+    if 100 > mouseX > 50 and 70 > mouseY > 50 and clicked==1:
+        pygame.draw.rect(window, GREY, (50,50,80,20))
+        newGameButtonClicked = True
+    elif gameIsOver:
+        pygame.draw.rect(window, ORANGE, (50,50,80,20))
     else:
-        winnerFont=pygame.font.Font(None, 18)
-        winnerText=winnerFont.render("No Player wins, it is a tie!", 1, BLACK)
-        windowWinner.blit(winnerText, (10,50,20,20))
+        pygame.draw.rect(window, WHITE, (50, 50, 80, 20))
+
+    # New Game Button
+    resetFont= pygame.font.Font(None, 16)
+    resetText= resetFont.render("New Game", 1, BLACK)
+    window.blit(resetText, (60,55,50,50))
+    return newGameButtonClicked
+
+def blit_text_with_outline(outerText, innerText, window, position):
+    window.blit(outerText, (position[0]-1,position[1],position[2],position[3]))
+    window.blit(outerText, (position[0]-1,position[1]-1,position[2],position[3]))
+    window.blit(outerText, (position[0]-1,position[1]+1,position[2],position[3]))
+    window.blit(outerText, (position[0]+1,position[1],position[2],position[3]))
+    window.blit(outerText, (position[0]+1,position[1]-1,position[2],position[3]))
+    window.blit(outerText, (position[0]+1,position[1]+1,position[2],position[3]))
+    window.blit(outerText, (position[0],position[1]-1,position[2],position[3]))
+    window.blit(outerText, (position[0],position[1]+1,position[2],position[3]))
+    window.blit(innerText, (position[0],position[1],position[2],position[3]))
+
+def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
+    font=pygame.font.Font(None, 18)
+
+    blackTextOutline=font.render("Black Stones: {}".format(occupiedBlack), 1, WHITE)
+    blackText=font.render("Black Stones: {}".format(occupiedBlack), 1, BLACK)
+    blit_text_with_outline(blackTextOutline, blackText, window, (640,50,20,20))
+
+    whiteTextOutline=font.render("White Stones: {}".format(occupiedWhite), 1, BLACK)
+    whiteText=font.render("White Stones: {}".format(occupiedWhite), 1, WHITE)
+    blit_text_with_outline(whiteTextOutline, whiteText, window, (640,70,20,20))
+    
+    if currentPlayer==1:
+        showPlayerText=font.render("BLACK player's turn!", 1, BLACK)
+        showPlayerTextOutline=font.render("BLACK player's turn!", 1, WHITE)
+    else:
+        showPlayerText=font.render("WHITE player's turn!", 1, WHITE)
+        showPlayerTextOutline=font.render("WHITE player's turn!", 1, BLACK)
+    
+    blit_text_with_outline(showPlayerTextOutline, showPlayerText, window, (350,50,200,20))        
+
+def show_winner(window, occupiedWhite, occupiedBlack):
+    window.fill((64,64,64,128), special_flags=pygame.BLEND_MULT)
+
+
+    if occupiedWhite>occupiedBlack:
+        winnerFont=pygame.font.Font(None, 48)
+        winnerText=winnerFont.render("Player White wins, congratulations!", 1, ORANGE)
+        window.blit(winnerText, (100,350,200,200))
+    elif occupiedBlack>occupiedWhite:
+        winnerFont=pygame.font.Font(None, 48)
+        winnerText=winnerFont.render("Player Black wins, congratulations!", 1, ORANGE)
+        window.blit(winnerText, (100,350,200,200)) 
+    else:
+        winnerFont=pygame.font.Font(None, 48)
+        winnerText=winnerFont.render("No Player wins, it is a tie!", 1, ORANGE)
+        window.blit(winnerText, (100,350,200,200))
         
 # ---------------------------------------------------------------------
 
@@ -297,13 +316,6 @@ def main():
     ##        continue
 
         window.fill(BROWN)
-        
-        newGameButtonClicked = draw_buttons(window, mouseX, mouseY, clicked)
-        if newGameButtonClicked:
-            stoneSet = stones_set()
-            stoneSet = basic_lineup(stoneSet)
-            currentPlayer = 1
-            print "new game"
 
         positionArrow = check_mouse_position(allPositionsRect, mouseX, mouseY)
 
@@ -325,11 +337,22 @@ def main():
         draw_Field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
 
         occupiedBlack,occupiedWhite = calc_occupied_stones(stoneSet)
+
         show_text(window, currentPlayer, occupiedBlack, occupiedWhite)
 
-        if occupiedBlack + occupiedWhite == 64:
-            show_winner(occupiedWhite, occupiedBlack)
-        
+        gameIsOver = occupiedBlack + occupiedWhite == 64
+
+        if gameIsOver:
+            show_winner(window, occupiedWhite, occupiedBlack)
+
+        newGameButtonClicked = draw_buttons(window, mouseX, mouseY, clicked, gameIsOver)
+
+        if newGameButtonClicked:
+            stoneSet = stones_set()
+            stoneSet = basic_lineup(stoneSet)
+            currentPlayer = 1
+            if DEBUG:    print "new game"
+       
         pygame.display.flip()
 
     ##    init = False
