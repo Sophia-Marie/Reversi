@@ -96,7 +96,7 @@ def any_available_move_for_next_player(stoneSet, player):
                 return True
     return False
     
-def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = False):
+def available_Moves(stoneSet, player, p, direction, foundOpponent = False):
     p += direction
     if 0<=p<=63:
         if DEBUG:    print "stoneSet[p]:", stoneSet[p]
@@ -124,7 +124,7 @@ def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = F
                 return False        
             else:
                 if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-                return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
+                return available_Moves(stoneSet, player, p, direction, foundOpponent)
             
         if direction==-1 or direction==1:
             if stoneSet[p] == (2 if player == 2 else 1):
@@ -138,7 +138,7 @@ def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = F
                 return False        
             else:
                 if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-                return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
+                return available_Moves(stoneSet, player, p, direction, foundOpponent)
         else:
             if stoneSet[p] == (2 if player == 2 else 1):
                 if DEBUG:    print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
@@ -151,11 +151,11 @@ def available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent = F
                 return False        
             else:
                 if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-                return available_Moves_horizontal(stoneSet, player, p, direction, foundOpponent)
+                return available_Moves(stoneSet, player, p, direction, foundOpponent)
     else:
         None
 
-def available_Moves_horizontal_flip(stoneSet, player, p, direction, foundOpponent = False):
+def flip_stones_on_game_board(stoneSet, player, p, direction, foundOpponent = False):
     if 0<=p<=63:
         p += direction
         if stoneSet[p] == (2 if player == 2 else 1):
@@ -164,21 +164,22 @@ def available_Moves_horizontal_flip(stoneSet, player, p, direction, foundOpponen
         else:
             if DEBUG:    print "[FLIP] coloring and recursive call p={}, foundOpponent={}".format(p, foundOpponent)
             stoneSet[p] = 2 if player == 2 else 1
-            return available_Moves_horizontal_flip(stoneSet, player, p, direction, foundOpponent)
+            return flip_stones_on_game_board(stoneSet, player, p, direction, foundOpponent)
     else:
         None
     
 def analyse(stoneSet, direction, player, positionArrow, doFlip):
-    if DEBUG:    print "--- analysis start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
+    if DEBUG:
+        print "--- analysis start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
         if not doFlip:
             print "analyse only"
         else:
             print "analyse and flip"
-    flipOk = available_Moves_horizontal(stoneSet, player, positionArrow, direction)
+    flipOk = available_Moves(stoneSet, player, positionArrow, direction)
 
     if flipOk and doFlip:
         if DEBUG:    print "--- flip start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
-        available_Moves_horizontal_flip(stoneSet, player, positionArrow, direction)
+        flip_stones_on_game_board(stoneSet, player, positionArrow, direction)
         if DEBUG:    print "--- flip end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")        
 
     if DEBUG:    print "--- analysis end --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
@@ -222,7 +223,7 @@ def calc_occupied_stones(stoneSet):
 
     return occupiedBlack, occupiedWhite
 
-def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver):
+def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON):
     newGameButtonClicked = False
     font= pygame.font.Font(None, 18)
     
@@ -236,20 +237,20 @@ def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver):
         
     #player vs player button
     if 350 > mouseX > 250 and 28 > mouseY > 8 and clicked==1:
-        pygame.draw.rect(window, DARKGREEN, (250,8,100,20))
-        playerVsPlayerClicked = True
+        pygame.draw.rect(window, GREY, (250,8,100,20))
+        kiON = "Off"
     else:
-        pygame.draw.rect(window, GREEN, (250,8,100,20))
+        pygame.draw.rect(window, WHITE, (250,8,100,20))
         
     playerKiText=font.render("Player vs Player", 1, BLACK)
     window.blit(playerKiText, (250,10,80,20))
 
     #player vs Ki button
     if 475 > mouseX > 400 and 28 > mouseY > 8 and clicked==1:
-        pygame.draw.rect(window, DARKGREEN, (400,8,75,20))
-        playerVsKiClicked=True
+        pygame.draw.rect(window, GREY, (400,8,75,20))
+        kiON="On"
     else:
-        pygame.draw.rect(window, GREEN, (400,8,75,20))
+        pygame.draw.rect(window, WHITE, (400,8,75,20))
     playerKiText=font.render("Player vs Ki", 1, BLACK)
     window.blit(playerKiText, (400,10,80,20))
 
@@ -257,22 +258,15 @@ def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver):
     resetText= font.render("New Game", 1, BLACK)
     window.blit(resetText, (60,55,50,50))
     
-    return newGameButtonClicked #, playerVsPlayerClicked, playerVsKiClicked
+    return newGameButtonClicked , kiON
 
-def ki_on_or_off(mouseX, mouseY, clicked):
-    kiOn="Off"
-    if 350 > mouseX > 250 and 28 > mouseY > 8 and clicked==1:
-        kiOn = "Off"
-    elif 475 > mouseX > 400 and 28 > mouseY > 8 and clicked==1:
-        kiOn="On"
-
-        
-    return kiOn
-
-def ki_move_set(kiTurn):
-    if kiTurn:
-        pass
-        
+def ki_move_set(stoneSet, currentPlayer):
+    #waehle ersten moeglichen Zug aus
+    for i, stone in enumerate(stoneSet):
+        if stone == 0:
+            if only_analyse_for_all_directions(stoneSet, currentPlayer, i):
+                kiMove=i
+                return kiMove
 
 def blit_text_with_outline(outerText, innerText, window, position):
     window.blit(outerText, (position[0]-1,position[1],position[2],position[3]))
@@ -308,48 +302,28 @@ def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
     
     blit_text_with_outline(showPlayerTextOutline, showPlayerText, window, (350,50,200,20))
 
-def player_vs_player(stoneSet, currentPlayer, positionArrow, clicked):
+
+def player_move(stoneSet, currentPlayer, positionArrow, clicked, kiTurn):
+    flipOk=False
     if positionArrow != None and clicked and stoneSet[positionArrow]==0:
         flipOk = flip(stoneSet, currentPlayer, positionArrow)
-        if flipOk:
-            availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
-            if currentPlayer == 1:
-                if not availableMove:
-                    currentPlayer = 1
-                else:
-                    currentPlayer = 2
-                if DEBUG: print "current Player: {}".format("BLACK" if currentPlayer == 1 else "WHITE") 
-            else:
-                if not availableMove:
-                    currentPlayer = 2
-                else:
-                    currentPlayer = 1
-                if DEBUG: print "current Player: {}".format("BLACK" if currentPlayer == 1 else "WHITE")
-                
-def player_vs_ki(stoneSet, currentPlayer, positionArrow, clicked):
-    if currentPlayer==1:
-        if positionArrow != None and clicked and stoneSet[positionArrow]==0 and not kiTurn:
-            flipOk = flip(stoneSet, currentPlayer, positionArrow)
-            if flipOk:
-                availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
-                if currentPlayer == 1:
-                    if not availableMove:
-                        currentPlayer = 1
-                    else:
-                        currentPlayer=2
-                        kiTurn=True
+        if DEBUG: print "current Player: {}".format("BLACK" if currentPlayer == 1 else "WHITE")
+    
+    return flipOk
+
+def player_change(currentPlayer, kiTurn, kiON, availableMove):
+    if currentPlayer == 1:
+        if availableMove:
+            currentPlayer = 2
+            if kiON=="On":
+                kiTurn=True
     else:
-        kiTurn=True
-        #kiMove= #funktion die den gewaehlten Stein zurueck gibt
-        flipOk=flip(stoneSet,currentplayer, kiMove)
-        if flipOk:
-            availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
-            if currentPlayer==2:
-                if not availableMove:
-                    currentPlayer = 2
-                    kiTurn=True
-                else:
-                    currentPlayer = 1
+        if availableMove:
+            currentPlayer = 1
+            if kiON =="On":
+                kiTurn=False
+                
+    return currentPlayer, kiTurn
 
 
 def show_winner(window, occupiedWhite, occupiedBlack):
@@ -379,6 +353,8 @@ def main():
     pygame.display.set_caption("Reversi")
 
     currentPlayer = 1
+    kiTurn= False
+    kiON = "Off"
 
     # first call of functions
     allPositionsRect = calculate_position()
@@ -396,7 +372,6 @@ def main():
                 
         mouseX, mouseY = get_mouse_position()
         clicked = check_mouse_pressed()
-        kiON =ki_on_or_off(mouseX, mouseY, clicked)
 
     ##    if not init and not clicked:
     ##        sleep(0.01)
@@ -406,14 +381,14 @@ def main():
 
         positionArrow = check_mouse_position(allPositionsRect, mouseX, mouseY)
         
-##        if not kiON=="Off":
-##            pass
-##            player_vs_ki(stoneSet, currentPlayer, positionArrow, clicked)
-##            
-##        else:
-        player_vs_player(stoneSet, currentPlayer, positionArrow, clicked)
-             
-
+        if kiTurn:
+            positionArrow=ki_move_set(stoneSet, currentPlayer)
+            clicked=1
+        flipOk = player_move(stoneSet, currentPlayer, positionArrow, clicked, kiTurn)
+        if flipOk:
+            availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
+            currentPlayer, kiTurn = player_change(currentPlayer, kiTurn, kiON, availableMove)
+            
         draw_Field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
 
         occupiedBlack,occupiedWhite = calc_occupied_stones(stoneSet)
@@ -425,7 +400,7 @@ def main():
         if gameIsOver:
             show_winner(window, occupiedWhite, occupiedBlack)
 
-        newGameButtonClicked = draw_buttons(window, mouseX, mouseY, clicked, gameIsOver)
+        newGameButtonClicked , kiON = draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON)
 
         if newGameButtonClicked:
             stoneSet = stones_set()
@@ -499,21 +474,24 @@ class TestPlacement(unittest.TestCase):
 
     def test_player_change(self):
         self.stoneSet = basic_lineup(self.stoneSet)
+        kiON="Off"
         currentPlayer=1
-        player_vs_player(self.stoneSet, currentPlayer, 29, 1)
+        kiTurn= False
+        positionArrow=29
+        clicked=1
+        flipOk=player_move(self.stoneSet, currentPlayer, positionArrow, clicked, kiTurn)
+        if flipOk:
+            availableMove = any_available_move_for_next_player(self.stoneSet, currentPlayer)
+            currentPlayer, kiTurn=player_change(currentPlayer, kiTurn, kiON, availableMove)
+            
         self.assertTrue(currentPlayer==2)
 
     def test_any_available_move(self):
         availableMove = any_available_move_for_next_player(self.stoneSet, 1)
         self.assertFalse(availableMove)
-
         self.stoneSet = basic_lineup(self.stoneSet)
         availableMove = any_available_move_for_next_player(self.stoneSet, 1)
         self.assertTrue(availableMove)
-        
-    def test_kiOn(self):
-        kiOn=ki_on_or_off(300, 20, 0)
-        self.assertTrue(kiOn=="Off")
 
     def test_bug_situation_1(self):
         # Up
@@ -568,8 +546,8 @@ class TestPlacement(unittest.TestCase):
         self.assertListEqual(expectedStoneSet, self.stoneSet)
 
 if __name__ == '__main__':
-    #TESTING = False
-    TESTING = True
+    TESTING = False
+    #TESTING = True
 
     if TESTING:
         unittest.main()
