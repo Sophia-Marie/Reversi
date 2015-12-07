@@ -1,5 +1,6 @@
 import unittest
 import pygame
+import math
 from time import sleep
 
 # Global variables
@@ -68,8 +69,7 @@ def calculate_position():
         
     return allPositions
 
-
-def draw_Field(window, player, allPositionsRect, positionArrow, stoneSet, clicked):
+def draw_field(window, player, allPositionsRect, positionArrow, stoneSet, clicked):
     
     for i, positionList in enumerate(allPositionsRect):
         if positionArrow==i:
@@ -92,11 +92,12 @@ def any_available_move_for_next_player(stoneSet, player):
 
     for i, stone in enumerate(stoneSet):
         if stone == 0:
-            if only_analyse_for_all_directions(stoneSet, nextPlayer, i):
+            flipOk = only_analyse_for_all_directions(stoneSet, nextPlayer, i)
+            if flipOk:
                 return True
     return False
     
-def available_Moves(stoneSet, player, p, direction, foundOpponent = False):
+def available_moves(stoneSet, player, p, direction, foundOpponent = False):
     p += direction
     if 0<=p<=63:
         if DEBUG:    print "stoneSet[p]:", stoneSet[p]
@@ -124,9 +125,9 @@ def available_Moves(stoneSet, player, p, direction, foundOpponent = False):
                 return False        
             else:
                 if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-                return available_Moves(stoneSet, player, p, direction, foundOpponent)
+                return available_moves(stoneSet, player, p, direction, foundOpponent)
             
-        if direction==-1 or direction==1:
+        elif direction==-1 or direction==1:
             if stoneSet[p] == (2 if player == 2 else 1):
                 if DEBUG:    print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
                 return foundOpponent
@@ -138,7 +139,7 @@ def available_Moves(stoneSet, player, p, direction, foundOpponent = False):
                 return False        
             else:
                 if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-                return available_Moves(stoneSet, player, p, direction, foundOpponent)
+                return available_moves(stoneSet, player, p, direction, foundOpponent)
         else:
             if stoneSet[p] == (2 if player == 2 else 1):
                 if DEBUG:    print "end of recursion (own stone) p={}, foundOpponent={}".format(p, foundOpponent)
@@ -151,7 +152,7 @@ def available_Moves(stoneSet, player, p, direction, foundOpponent = False):
                 return False        
             else:
                 if DEBUG:    print "recursive call p={}, foundOpponent={}".format(p, foundOpponent)
-                return available_Moves(stoneSet, player, p, direction, foundOpponent)
+                return available_moves(stoneSet, player, p, direction, foundOpponent)
     else:
         None
 
@@ -175,7 +176,7 @@ def analyse(stoneSet, direction, player, positionArrow, doFlip):
             print "analyse only"
         else:
             print "analyse and flip"
-    flipOk = available_Moves(stoneSet, player, positionArrow, direction)
+    flipOk= available_moves(stoneSet, player, positionArrow, direction)
 
     if flipOk and doFlip:
         if DEBUG:    print "--- flip start --- PLAYER: {}".format("BLACK" if player == 1 else "WHITE")
@@ -188,16 +189,16 @@ def analyse(stoneSet, direction, player, positionArrow, doFlip):
 
 def for_all_directions(stoneSet, currentPlayer, positionArrow, doFlip):
     rightFlipOk = analyse(stoneSet, 1, currentPlayer, positionArrow, doFlip)
-    leftFlipOk = analyse(stoneSet, -1, currentPlayer, positionArrow, doFlip)
-    upFlipOk = analyse(stoneSet, 8, currentPlayer, positionArrow, doFlip)
-    downFlipOk = analyse(stoneSet, -8, currentPlayer, positionArrow, doFlip)
+    leftFlipOk  = analyse(stoneSet, -1, currentPlayer, positionArrow, doFlip)
+    upFlipOk    = analyse(stoneSet, 8, currentPlayer, positionArrow, doFlip)
+    downFlipOk  = analyse(stoneSet, -8, currentPlayer, positionArrow, doFlip)
     sevenFlipOk = analyse(stoneSet, 7, currentPlayer, positionArrow, doFlip)
     sevendownFlipOk = analyse(stoneSet, -7, currentPlayer, positionArrow, doFlip)
-    nineFlipOk= analyse(stoneSet, 9, currentPlayer, positionArrow, doFlip)
-    ninedownFlipOk= analyse(stoneSet, -9, currentPlayer, positionArrow, doFlip)
+    nineFlipOk = analyse(stoneSet, 9, currentPlayer, positionArrow, doFlip)
+    ninedownFlipOk = analyse(stoneSet, -9, currentPlayer, positionArrow, doFlip)
     flipOk = leftFlipOk or rightFlipOk or upFlipOk or downFlipOk or sevenFlipOk or sevendownFlipOk or nineFlipOk or ninedownFlipOk
     return flipOk
-
+    
 def flip_for_all_directions(stoneSet, currentPlayer, positionArrow):
     return for_all_directions(stoneSet, currentPlayer, positionArrow, True)
 
@@ -206,10 +207,9 @@ def only_analyse_for_all_directions(stoneSet, currentPlayer, positionArrow):
 
 def flip(stoneSet, currentPlayer, positionArrow):    
     flipOk = flip_for_all_directions(stoneSet, currentPlayer, positionArrow)
-
     if flipOk:
         stoneSet[positionArrow] = currentPlayer
-
+        
     return flipOk
 
 def calc_occupied_stones(stoneSet):
@@ -223,7 +223,7 @@ def calc_occupied_stones(stoneSet):
 
     return occupiedBlack, occupiedWhite
 
-def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON):
+def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON, ki1, ki2):
     newGameButtonClicked = False
     font= pygame.font.Font(None, 18)
     
@@ -249,25 +249,52 @@ def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON):
     if 475 > mouseX > 400 and 28 > mouseY > 8 and clicked==1:
         pygame.draw.rect(window, GREY, (400,8,75,20))
         kiON="On"
+        ki1=True
     else:
         pygame.draw.rect(window, WHITE, (400,8,75,20))
-    playerKiText=font.render("Player vs Ki", 1, BLACK)
+    playerKiText=font.render("Player vs easy Ki", 1, BLACK)
     window.blit(playerKiText, (400,10,80,20))
+
+    if 575 > mouseX > 500 and 28 > mouseY > 8 and clicked==1:
+        pygame.draw.rect(window, GREY, (500,8,75,20))
+        kiON="On"
+        ki2=True
+    else:
+        pygame.draw.rect(window, WHITE, (500,8,75,20))
+    playerBetterKiText=font.render("Player vs better Ki", 1, BLACK)
+    window.blit(playerBetterKiText, (500,10,80,20))
 
     # New Game button
     resetText= font.render("New Game", 1, BLACK)
     window.blit(resetText, (60,55,50,50))
     
-    return newGameButtonClicked , kiON
+    return newGameButtonClicked , kiON, ki1, ki2
 
-def ki_move_set(stoneSet, currentPlayer):
+def ki_move_set(stoneSet, currentPlayer, ki1, ki2):
     #waehle ersten moeglichen Zug aus
-    for i, stone in enumerate(stoneSet):
-        if stone == 0:
-            if only_analyse_for_all_directions(stoneSet, currentPlayer, i):
-                kiMove=i
-                return kiMove
+    kiMove=0
+    if ki1:
+        for i, stone in enumerate(stoneSet):
+            if stone == 0:
+                flipOk= only_analyse_for_all_directions(stoneSet, currentPlayer, i)
+                if flipOk:
+                    kiMove=i
+                    return kiMove
+    elif ki2:
+        maxFlip=0
 
+        for i, stone in enumerate(stoneSet):
+            if stone ==0:
+                flipOk=only_analyse_for_all_directions(stoneSet, currentPlayer, i)
+                if flipOk:
+                    stoneSetCopy = list(stoneSet)
+                    flip(stoneSetCopy, currentPlayer, i)
+                    black,white = calc_occupied_stones(stoneSetCopy)
+                    if white>maxFlip:
+                        maxFlip=white
+                        kiMove=i
+        return kiMove
+            
 def blit_text_with_outline(outerText, innerText, window, position):
     window.blit(outerText, (position[0]-1,position[1],position[2],position[3]))
     window.blit(outerText, (position[0]-1,position[1]-1,position[2],position[3]))
@@ -303,7 +330,7 @@ def show_text(window, currentPlayer, occupiedBlack, occupiedWhite):
     blit_text_with_outline(showPlayerTextOutline, showPlayerText, window, (350,50,200,20))
 
 
-def player_move(stoneSet, currentPlayer, positionArrow, clicked, kiTurn):
+def player_move(stoneSet, currentPlayer, positionArrow, clicked):
     flipOk=False
     if positionArrow != None and clicked and stoneSet[positionArrow]==0:
         flipOk = flip(stoneSet, currentPlayer, positionArrow)
@@ -325,6 +352,16 @@ def player_change(currentPlayer, kiTurn, kiON, availableMove):
                 
     return currentPlayer, kiTurn
 
+def check_if_game_is_over(occupiedBlack, occupiedWhite):
+    if occupiedBlack + occupiedWhite == 64:
+            gameIsOver= True
+    elif occupiedBlack ==0:
+        gameIsOver= True
+    elif occupiedWhite==0:
+        gameIsOver= True
+    else:
+        gameIsOver= False
+    return gameIsOver
 
 def show_winner(window, occupiedWhite, occupiedBlack):
     window.fill((64,64,64,128), special_flags=pygame.BLEND_MULT)
@@ -352,9 +389,12 @@ def main():
 
     pygame.display.set_caption("Reversi")
 
+    #first assign of variables
     currentPlayer = 1
-    kiTurn= False
+    kiTurn = False
     kiON = "Off"
+    ki1 = False
+    ki2 = False
 
     # first call of functions
     allPositionsRect = calculate_position()
@@ -382,30 +422,31 @@ def main():
         positionArrow = check_mouse_position(allPositionsRect, mouseX, mouseY)
         
         if kiTurn:
-            positionArrow=ki_move_set(stoneSet, currentPlayer)
+            positionArrow=ki_move_set(stoneSet, currentPlayer, ki1, ki2)
             clicked=1
-        flipOk = player_move(stoneSet, currentPlayer, positionArrow, clicked, kiTurn)
+        flipOk = player_move(stoneSet, currentPlayer, positionArrow, clicked)
         if flipOk:
             availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
             currentPlayer, kiTurn = player_change(currentPlayer, kiTurn, kiON, availableMove)
             
-        draw_Field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
+        draw_field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
 
         occupiedBlack,occupiedWhite = calc_occupied_stones(stoneSet)
 
         show_text(window, currentPlayer, occupiedBlack, occupiedWhite)
 
-        gameIsOver = occupiedBlack + occupiedWhite == 64
+        gameIsOver= check_if_game_is_over(occupiedBlack,occupiedWhite)
 
         if gameIsOver:
             show_winner(window, occupiedWhite, occupiedBlack)
 
-        newGameButtonClicked , kiON = draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON)
+        newGameButtonClicked , kiON, ki1, ki2 = draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON, ki1, ki2)
 
         if newGameButtonClicked:
             stoneSet = stones_set()
             stoneSet = basic_lineup(stoneSet)
             currentPlayer = 1
+            kiTurn = False
             if DEBUG:    print "new game"
        
         pygame.display.flip()
@@ -479,15 +520,15 @@ class TestPlacement(unittest.TestCase):
         kiTurn= False
         positionArrow=29
         clicked=1
-        flipOk=player_move(self.stoneSet, currentPlayer, positionArrow, clicked, kiTurn)
+        flipOk=player_move(self.stoneSet, currentPlayer, positionArrow, clicked)
         if flipOk:
-            availableMove = any_available_move_for_next_player(self.stoneSet, currentPlayer)
+            availableMove= any_available_move_for_next_player(self.stoneSet, currentPlayer)
             currentPlayer, kiTurn=player_change(currentPlayer, kiTurn, kiON, availableMove)
             
         self.assertTrue(currentPlayer==2)
 
     def test_any_available_move(self):
-        availableMove = any_available_move_for_next_player(self.stoneSet, 1)
+        availableMove= any_available_move_for_next_player(self.stoneSet, 1)
         self.assertFalse(availableMove)
         self.stoneSet = basic_lineup(self.stoneSet)
         availableMove = any_available_move_for_next_player(self.stoneSet, 1)
