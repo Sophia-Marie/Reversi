@@ -252,8 +252,8 @@ def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON, ki1, ki2):
         ki1=True
     else:
         pygame.draw.rect(window, WHITE, (400,8,75,20))
-    playerKiText=font.render("Player vs easy Ki", 1, BLACK)
-    window.blit(playerKiText, (400,10,80,20))
+    playerKiText=font.render("vs easy Ki", 1, BLACK)
+    window.blit(playerKiText, (402,10,80,20))
 
     if 575 > mouseX > 500 and 28 > mouseY > 8 and clicked==1:
         pygame.draw.rect(window, GREY, (500,8,75,20))
@@ -261,8 +261,8 @@ def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON, ki1, ki2):
         ki2=True
     else:
         pygame.draw.rect(window, WHITE, (500,8,75,20))
-    playerBetterKiText=font.render("Player vs better Ki", 1, BLACK)
-    window.blit(playerBetterKiText, (500,10,80,20))
+    playerBetterKiText=font.render("vs better Ki", 1, BLACK)
+    window.blit(playerBetterKiText, (502,10,80,20))
 
     # New Game button
     resetText= font.render("New Game", 1, BLACK)
@@ -293,7 +293,7 @@ def ki_move_set(stoneSet, currentPlayer, ki1, ki2):
                     if white>maxFlip:
                         maxFlip=white
                         kiMove=i
-        return kiMove
+    return kiMove
             
 def blit_text_with_outline(outerText, innerText, window, position):
     window.blit(outerText, (position[0]-1,position[1],position[2],position[3]))
@@ -352,32 +352,43 @@ def player_change(currentPlayer, kiTurn, kiON, availableMove):
                 
     return currentPlayer, kiTurn
 
-def check_if_game_is_over(occupiedBlack, occupiedWhite):
+def check_if_game_is_over(occupiedBlack, occupiedWhite, stoneSet):
+    availableMove1=any_available_move_for_next_player(stoneSet, 1)
+    availableMove2=any_available_move_for_next_player(stoneSet, 2)
     if occupiedBlack + occupiedWhite == 64:
-            gameIsOver= True
+        gameIsOver= True
     elif occupiedBlack ==0:
         gameIsOver= True
     elif occupiedWhite==0:
         gameIsOver= True
+    elif availableMove1==False and availableMove2==False:
+        gameIsOver= True
     else:
         gameIsOver= False
+    
     return gameIsOver
 
-def show_winner(window, occupiedWhite, occupiedBlack):
+def show_winner(window, occupiedWhite, occupiedBlack, ki1, ki2):
     window.fill((64,64,64,128), special_flags=pygame.BLEND_MULT)
 
 
     if occupiedWhite>occupiedBlack:
         winnerFont=pygame.font.Font(None, 48)
-        winnerText=winnerFont.render("Player White wins, congratulations!", 1, ORANGE)
+        if ki1 or ki2:
+            winnerText=winnerFont.render("Game Over!", 1, ORANGE)
+        else:
+            winnerText=winnerFont.render("Player White wins, congratulations!", 1, ORANGE)
         window.blit(winnerText, (100,350,200,200))
     elif occupiedBlack>occupiedWhite:
         winnerFont=pygame.font.Font(None, 48)
-        winnerText=winnerFont.render("Player Black wins, congratulations!", 1, ORANGE)
+        if ki1 or ki2:
+            winnerText=winnerFont.render("Congratulations, you won!", 1, ORANGE)
+        else:
+            winnerText=winnerFont.render("Player Black wins, congratulations!", 1, ORANGE)
         window.blit(winnerText, (100,350,200,200)) 
     else:
         winnerFont=pygame.font.Font(None, 48)
-        winnerText=winnerFont.render("No Player wins, it is a tie!", 1, ORANGE)
+        winnerText=winnerFont.render("No Player wins, it's a tie!", 1, ORANGE)
         window.blit(winnerText, (100,350,200,200))
         
 # ---------------------------------------------------------------------
@@ -428,6 +439,7 @@ def main():
         if flipOk:
             availableMove = any_available_move_for_next_player(stoneSet, currentPlayer)
             currentPlayer, kiTurn = player_change(currentPlayer, kiTurn, kiON, availableMove)
+        clicked = check_mouse_pressed()
             
         draw_field(window, currentPlayer, allPositionsRect, positionArrow, stoneSet, clicked)
 
@@ -435,10 +447,10 @@ def main():
 
         show_text(window, currentPlayer, occupiedBlack, occupiedWhite)
 
-        gameIsOver= check_if_game_is_over(occupiedBlack,occupiedWhite)
+        gameIsOver= check_if_game_is_over(occupiedBlack, occupiedWhite, stoneSet)
 
         if gameIsOver:
-            show_winner(window, occupiedWhite, occupiedBlack)
+            show_winner(window, occupiedWhite, occupiedBlack, ki1, ki2)
 
         newGameButtonClicked , kiON, ki1, ki2 = draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON, ki1, ki2)
 
