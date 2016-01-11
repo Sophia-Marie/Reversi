@@ -271,7 +271,6 @@ def draw_buttons(window, mouseX, mouseY, clicked, gameIsOver, kiON, ki1, ki2):
     return newGameButtonClicked , kiON, ki1, ki2
 
 def ki_move_set(stoneSet, currentPlayer, ki1, ki2):
-    #waehle ersten moeglichen Zug aus
     kiMove=0
     if ki1:
         for i, stone in enumerate(stoneSet):
@@ -282,6 +281,13 @@ def ki_move_set(stoneSet, currentPlayer, ki1, ki2):
                     return kiMove
     elif ki2:
         maxFlip=0
+        edgesList=[0, 7, 56, 63]
+        for i in edgesList:
+            if stoneSet[i]==0:
+                flipOk=only_analyse_for_all_directions(stoneSet, currentPlayer, i)
+                if flipOk:
+                    kiMove=i
+                    return kiMove
 
         for i, stone in enumerate(stoneSet):
             if stone ==0:
@@ -293,7 +299,7 @@ def ki_move_set(stoneSet, currentPlayer, ki1, ki2):
                     if white>maxFlip:
                         maxFlip=white
                         kiMove=i
-    return kiMove
+        return kiMove
             
 def blit_text_with_outline(outerText, innerText, window, position):
     window.blit(outerText, (position[0]-1,position[1],position[2],position[3]))
